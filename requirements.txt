@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+python-multipart
+aiofiles
+python-dotenv
+aiosqlite
+
+langchain
+langchain-google-genai
