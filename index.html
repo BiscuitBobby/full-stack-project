@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PCB Device Manager</title>
     <style>
-        /* --- GLOBAL STYLES & VARIABLES --- */
+        /* --- ALL CSS REMAINS THE SAME --- */
         :root {
             --bg-color: #1c1c1c;
             --surface-color: #2a2a2a;
@@ -33,7 +33,6 @@
             padding: 40px;
         }
 
-        /* --- HEADER --- */
         header {
             display: flex;
             justify-content: space-between;
@@ -93,7 +92,6 @@
             cursor: not-allowed;
         }
 
-        /* --- ERROR/SUCCESS MESSAGES --- */
         .message {
             padding: 12px 16px;
             border-radius: 8px;
@@ -113,7 +111,6 @@
             border: 1px solid rgba(76, 175, 80, 0.3);
         }
 
-        /* --- MAIN CONTENT & EMPTY STATE --- */
         main {
             display: flex;
             justify-content: center;
@@ -141,7 +138,6 @@
             margin-bottom: 24px;
         }
 
-        /* --- DEVICE GRID & CARDS --- */
         #device-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -218,13 +214,16 @@
             margin-top: auto;
             background-color: transparent;
             border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .device-card .chat-btn:hover {
             background-color: #3e3e3e;
         }
 
-        /* --- MODAL STYLES --- */
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -369,7 +368,6 @@
             margin-top: 24px;
         }
 
-        /* --- Analysis View --- */
         #modal-analysis-view .analysis-status {
             display: flex;
             align-items: center;
@@ -413,6 +411,7 @@
             color: var(--text-muted-color);
             margin-bottom: 8px;
             font-weight: 500;
+            text-transform: uppercase;
         }
 
         .analysis-results-box .components-list {
@@ -434,11 +433,166 @@
             border-radius: 6px;
         }
 
+        #chat-modal {
+            max-width: 900px;
+            width: 95%;
+            height: 80vh;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-modal h2 {
+            padding: 24px 24px 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        #chat-modal .chat-container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .chat-info-pane {
+            width: 320px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            padding-right: 16px;
+        }
+        
+        .chat-info-pane img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .chat-info-pane h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        
+        .chat-info-pane .analysis-results-box {
+            padding: 0;
+            border: none;
+        }
+
+        .chat-info-pane .result-item {
+             margin-bottom: 20px;
+        }
+        
+        .quick-questions-list {
+            list-style: none;
+        }
+        .quick-questions-list li {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-muted-color);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .quick-questions-list li:hover {
+            color: var(--text-color);
+        }
+        
+        .chat-conversation-pane {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 14px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .ai-message {
+            background-color: var(--bg-color);
+            align-self: flex-start;
+        }
+        
+        .ai-message .avatar {
+            background-color: #3e3e3e;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            color: var(--text-muted-color);
+            font-style: italic;
+        }
+
+        #chat-form {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid var(--border-color);
+            gap: 12px;
+        }
+        
+        #chat-input {
+            flex-grow: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-family: var(--font-family);
+        }
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        #send-btn {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .hidden {
             display: none !important;
         }
 
-        /* --- Loading spinner --- */
         .spinner {
             display: inline-block;
             width: 16px;
@@ -490,7 +644,7 @@
         </div>
     </main>
 
-    <!-- Modal (initially hidden) -->
+    <!-- Add/Analyze Modal (initially hidden) -->
     <div id="modal-backdrop" class="modal-backdrop">
         <div id="modal" class="modal">
             <button id="modal-close-btn" class="modal-close-btn">×</button>
@@ -575,6 +729,62 @@
         </div>
     </div>
 
+    <!-- Chat Modal -->
+    <div id="chat-modal-backdrop" class="modal-backdrop">
+        <div id="chat-modal" class="modal">
+            <button id="chat-modal-close-btn" class="modal-close-btn">×</button>
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/>
+                    <path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/>
+                </svg>                
+                Chat about <span id="chat-device-name" style="color: var(--accent-color); margin-left: 4px;"></span>
+            </h2>
+            <div class="chat-container">
+                <div class="chat-info-pane">
+                    <img id="chat-device-image" src="" alt="Device Image">
+                    <h3 id="chat-device-name-info"></h3>
+                    <div class="analysis-results-box">
+                        <div class="result-item">
+                            <h4>Components</h4>
+                            <div class="components-list" id="chat-components-display"></div>
+                        </div>
+                         <div class="result-item">
+                            <h4>Operating Voltage</h4>
+                            <div class="result-value" id="chat-voltage-display"></div>
+                        </div>
+                        <div class="result-item">
+                            <h4>Description</h4>
+                            <p id="chat-description-display" style="font-size: 14px; color: var(--text-muted-color); line-height: 1.5;"></p>
+                        </div>
+                         <div class="result-item">
+                            <h4>Quick Questions</h4>
+                            <ul id="quick-questions" class="quick-questions-list">
+                                <!-- JS will populate this -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-conversation-pane">
+                    <div id="chat-messages">
+                        <!-- Messages will be added by JS -->
+                    </div>
+                    <form id="chat-form">
+                        <input type="text" id="chat-input" placeholder="Ask about this PCB device..." autocomplete="off">
+                        <button type="submit" id="send-btn" class="action">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- API Base URL ---
@@ -604,8 +814,24 @@
             const messageContainer = document.getElementById('message-container');
             const analysisMessageContainer = document.getElementById('analysis-message-container');
 
+            // --- Chat Modal Element Selectors ---
+            const chatModalBackdrop = document.getElementById('chat-modal-backdrop');
+            const chatModalCloseBtn = document.getElementById('chat-modal-close-btn');
+            const chatDeviceName = document.getElementById('chat-device-name');
+            const chatDeviceNameInfo = document.getElementById('chat-device-name-info');
+            const chatDeviceImage = document.getElementById('chat-device-image');
+            const chatComponentsDisplay = document.getElementById('chat-components-display');
+            const chatVoltageDisplay = document.getElementById('chat-voltage-display');
+            const chatDescriptionDisplay = document.getElementById('chat-description-display');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const quickQuestionsList = document.getElementById('quick-questions');
+
+
             let uploadedFile = null;
             let analysisResults = null;
+            let currentChatDeviceId = null; 
 
             // --- Utility Functions ---
             function showMessage(container, message, type = 'error') {
@@ -650,6 +876,7 @@
             function createDeviceCard(device) {
                 const card = document.createElement('div');
                 card.className = 'device-card';
+                card.dataset.deviceData = JSON.stringify(device);
 
                 const createdAt = new Date(device.created_at).toLocaleDateString('en-US', {
                     year: 'numeric', month: 'short', day: 'numeric'
@@ -657,6 +884,7 @@
 
                 const voltageIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
                 const componentsIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm16 14H5V5h14v14zM8 7h8v2H8zm0 4h8v2H8zm0 4h5v2H8z"/></svg>`;
+                const chatIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
                 
                 const displayedComponents = device.components.length > 3 
                     ? `${device.components.slice(0, 3).join(', ')}...` 
@@ -679,22 +907,19 @@
                             <span>${displayedComponents}</span>
                         </div>
                     </div>
-                    <button class="chat-btn secondary" disabled>Chat about this device</button>
+                    <button class="chat-btn secondary">${chatIcon} Chat about this device</button>
                 `;
                 deviceGrid.appendChild(card);
             }
             
             function displayAnalysisResults(results) {
-                // Populate the readonly device name
                 deviceNameReadonly.value = deviceNameInput.value.trim();
-                
-                // Populate the analysis results
                 document.getElementById('complexity-display').textContent = `${results.complexity}`;
                 document.getElementById('voltage-display').textContent = results.operating_voltage;
                 document.getElementById('description-display').textContent = results.description;
 
                 const componentsContainer = document.getElementById('components-display');
-                componentsContainer.innerHTML = ''; // Clear previous
+                componentsContainer.innerHTML = '';
                 results.components.forEach(comp => {
                     const tag = document.createElement('span');
                     tag.className = 'component-tag';
@@ -703,22 +928,22 @@
                 });
             }
 
-            // --- Modal Control ---
-            const openModal = () => {
+            // --- Add/Analyze Modal Control ---
+            const openAddModal = () => {
                 modalBackdrop.classList.add('visible');
                 document.body.style.overflow = 'hidden';
             };
             
-            const closeModal = () => {
+            const closeAddModal = () => {
                 modalBackdrop.classList.remove('visible');
                 document.body.style.overflow = '';
                 setTimeout(resetModal, 300);
             };
 
-            addDeviceBtns.forEach(btn => btn.addEventListener('click', openModal));
-            modalCloseBtn.addEventListener('click', closeModal);
+            addDeviceBtns.forEach(btn => btn.addEventListener('click', openAddModal));
+            modalCloseBtn.addEventListener('click', closeAddModal);
             modalBackdrop.addEventListener('click', (e) => {
-                if (e.target === modalBackdrop) closeModal();
+                if (e.target === modalBackdrop) closeAddModal();
             });
 
             // --- File Upload Handling ---
@@ -749,7 +974,7 @@
                     showMessage(messageContainer, 'Please upload a valid image file (PNG, JPG).');
                     return;
                 }
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                if (file.size > 10 * 1024 * 1024) {
                     showMessage(messageContainer, 'File size must be less than 10MB.');
                     return;
                 }
@@ -790,7 +1015,7 @@
                 }
             }
 
-            // --- Modal Action Buttons ---
+            // --- Add/Analyze Modal Action Buttons ---
             removeBtn.addEventListener('click', () => {
                 resetModal();
             });
@@ -858,7 +1083,7 @@
                         const errorData = await response.json().catch(() => ({ detail: 'Failed to save device.' }));
                         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
                     }
-                    closeModal();
+                    closeAddModal();
                     await loadDevices();
                 } catch (error) {
                     console.error('Save error:', error);
@@ -867,7 +1092,170 @@
                     setButtonLoading(saveBtn, false);
                 }
             });
+
+            // --- CHAT FUNCTIONALITY ---
+
+            function addMessageToUI(message, sender) {
+                const messageEl = document.createElement('div');
+                messageEl.classList.add('message-bubble');
+                
+                if (sender === 'ai') {
+                    messageEl.classList.add('ai-message');
+                    const avatar = `<div class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/><path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/></svg></div>`;
+                    messageEl.innerHTML = `${avatar}<span>${message}</span>`;
+                } else {
+                    messageEl.classList.add('user-message');
+                    messageEl.textContent = message;
+                }
+                chatMessages.appendChild(messageEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function showTypingIndicator() {
+                const indicator = document.createElement('div');
+                indicator.className = 'typing-indicator';
+                indicator.textContent = 'AI is thinking...';
+                chatMessages.appendChild(indicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function removeTypingIndicator() {
+                const indicator = chatMessages.querySelector('.typing-indicator');
+                if (indicator) {
+                    chatMessages.removeChild(indicator);
+                }
+            }
+
+            async function submitMessage(message) {
+                 if (!message.trim() || !currentChatDeviceId) return;
+
+                addMessageToUI(message, 'user');
+                chatInput.value = '';
+                showTypingIndicator();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('message', message);
+
+                    const response = await fetch(`${API_URL}/devices/${currentChatDeviceId}/chat`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    removeTypingIndicator();
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ detail: 'An unknown error occurred.' }));
+                        throw new Error(errorData.detail || `HTTP error! Status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    addMessageToUI(result.ai_response, 'ai');
+
+                } catch (error) {
+                    console.error('Chat submission error:', error);
+                    removeTypingIndicator();
+                    const errorMessage = `Sorry, I encountered an error and can't respond right now. Please try again later.`;
+                    addMessageToUI(errorMessage, 'ai');
+                }
+            }
             
+            // MODIFICATION: Entire function updated to load history
+            async function openChatModal(device) {
+                currentChatDeviceId = device.id;
+
+                // 1. Populate info pane (this is unchanged)
+                chatDeviceName.textContent = device.name;
+                chatDeviceNameInfo.textContent = device.name;
+                chatDeviceImage.src = `${API_URL}/static/images/${device.image_filename}`;
+                chatVoltageDisplay.textContent = device.operating_voltage;
+                chatDescriptionDisplay.textContent = device.description;
+                
+                chatComponentsDisplay.innerHTML = '';
+                device.components.forEach(comp => {
+                    const tag = document.createElement('span');
+                    tag.className = 'component-tag';
+                    tag.textContent = comp;
+                    chatComponentsDisplay.appendChild(tag);
+                });
+
+                // 2. Populate quick questions (this is unchanged)
+                const questions = [
+                    `How do I power the ${device.name}?`,
+                    `What are the main functions of the ${device.components[0] || 'main component'}?`,
+                    `Give me some common troubleshooting steps for this board.`
+                ];
+                quickQuestionsList.innerHTML = '';
+                questions.forEach(q => {
+                    const li = document.createElement('li');
+                    li.textContent = q;
+                    li.onclick = () => {
+                        chatInput.value = q;
+                        chatInput.focus();
+                        submitMessage(q);
+                    };
+                    quickQuestionsList.appendChild(li);
+                });
+
+                // 3. Reset chat history and load from the server
+                chatMessages.innerHTML = '';
+                try {
+                    const response = await fetch(`${API_URL}/devices/${device.id}/chat-history`);
+                    if (!response.ok) {
+                        throw new Error('Could not load chat history.');
+                    }
+                    const history = await response.json();
+                    
+                    if (history.length > 0) {
+                        history.forEach(msg => addMessageToUI(msg.content, msg.role));
+                    } else {
+                        // If there's no history, display the welcome message
+                        const welcomeMessage = `Hello! I'm here to help you with questions about your ${device.name}. I have analyzed this PCB and can provide information about its components, functionality, troubleshooting, and more. What would you like to know?`;
+                        addMessageToUI(welcomeMessage, 'ai');
+                    }
+                } catch (error) {
+                    console.error("Failed to load chat history:", error);
+                    const errorMessage = "Could not load previous conversation.";
+                    addMessageToUI(errorMessage, 'ai');
+                }
+
+
+                // 4. Show modal (this is unchanged)
+                chatModalBackdrop.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+
+            function closeChatModal() {
+                chatModalBackdrop.classList.remove('visible');
+                document.body.style.overflow = '';
+                currentChatDeviceId = null; 
+            }
+            
+            // Event listener to open chat modal
+            deviceGrid.addEventListener('click', (e) => {
+                const chatButton = e.target.closest('.chat-btn');
+                if (chatButton) {
+                    const card = e.target.closest('.device-card');
+                    if (card && card.dataset.deviceData) {
+                        const device = JSON.parse(card.dataset.deviceData);
+                        openChatModal(device);
+                    }
+                }
+            });
+
+            // Event listeners for closing chat modal
+            chatModalCloseBtn.addEventListener('click', closeChatModal);
+            chatModalBackdrop.addEventListener('click', (e) => {
+                if (e.target === chatModalBackdrop) closeChatModal();
+            });
+
+            // Event listener for sending a message
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitMessage(chatInput.value);
+            });
+
             // --- Initial Load ---
             loadDevices();
         });
