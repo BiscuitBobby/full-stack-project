@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PCB Device Manager</title>
+    <!-- ADDED: Markdown and Sanitizer Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
     <style>
-        /* --- ALL CSS REMAINS THE SAME --- */
+        /* --- ALL CSS REMAINS THE SAME UNTIL THE END... --- */
         :root {
             --bg-color: #1c1c1c;
             --surface-color: #2a2a2a;
@@ -607,6 +610,42 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* --- ADDED: CSS for Markdown Formatting --- */
+        .ai-message p { margin: 0.5em 0; }
+        .ai-message p:first-child { margin-top: 0; }
+        .ai-message p:last-child { margin-bottom: 0; }
+        .ai-message ul, .ai-message ol { padding-left: 20px; margin: 0.5em 0; }
+        .ai-message li { margin-bottom: 0.25em; }
+        .ai-message code {
+            background-color: #3e3e3e;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+        .ai-message pre {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 1em 0;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .ai-message pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+        .ai-message a { color: var(--accent-color); text-decoration: none; }
+        .ai-message a:hover { text-decoration: underline; }
+        .ai-message h1, .ai-message h2, .ai-message h3, .ai-message h4 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+
     </style>
 </head>
 <body>
@@ -1095,6 +1134,7 @@
 
             // --- CHAT FUNCTIONALITY ---
 
+            // MODIFIED: This function now parses Markdown for AI messages
             function addMessageToUI(message, sender) {
                 const messageEl = document.createElement('div');
                 messageEl.classList.add('message-bubble');
@@ -1102,8 +1142,16 @@
                 if (sender === 'ai') {
                     messageEl.classList.add('ai-message');
                     const avatar = `<div class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/><path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/></svg></div>`;
-                    messageEl.innerHTML = `${avatar}<span>${message}</span>`;
-                } else {
+                    
+                    const contentSpan = document.createElement('span');
+                    // Use marked to parse markdown, then DOMPurify to sanitize it
+                    const sanitizedHtml = DOMPurify.sanitize(marked.parse(message));
+                    contentSpan.innerHTML = sanitizedHtml;
+
+                    messageEl.innerHTML = avatar; // Add avatar first
+                    messageEl.appendChild(contentSpan); // Then add the content
+
+                } else { // 'user' message
                     messageEl.classList.add('user-message');
                     messageEl.textContent = message;
                 }
@@ -1160,11 +1208,10 @@
                 }
             }
             
-            // MODIFICATION: Entire function updated to load history
             async function openChatModal(device) {
                 currentChatDeviceId = device.id;
 
-                // 1. Populate info pane (this is unchanged)
+                // 1. Populate info pane
                 chatDeviceName.textContent = device.name;
                 chatDeviceNameInfo.textContent = device.name;
                 chatDeviceImage.src = `${API_URL}/static/images/${device.image_filename}`;
@@ -1179,7 +1226,7 @@
                     chatComponentsDisplay.appendChild(tag);
                 });
 
-                // 2. Populate quick questions (this is unchanged)
+                // 2. Populate quick questions
                 const questions = [
                     `How do I power the ${device.name}?`,
                     `What are the main functions of the ${device.components[0] || 'main component'}?`,
@@ -1210,7 +1257,7 @@
                         history.forEach(msg => addMessageToUI(msg.content, msg.role));
                     } else {
                         // If there's no history, display the welcome message
-                        const welcomeMessage = `Hello! I'm here to help you with questions about your ${device.name}. I have analyzed this PCB and can provide information about its components, functionality, troubleshooting, and more. What would you like to know?`;
+                        const welcomeMessage = `Hello! I'm here to help you with questions about your **${device.name}**. I have analyzed this PCB and can provide information about its components, functionality, troubleshooting, and more. What would you like to know?`;
                         addMessageToUI(welcomeMessage, 'ai');
                     }
                 } catch (error) {
@@ -1220,7 +1267,7 @@
                 }
 
 
-                // 4. Show modal (this is unchanged)
+                // 4. Show modal
                 chatModalBackdrop.classList.add('visible');
                 document.body.style.overflow = 'hidden';
             }
