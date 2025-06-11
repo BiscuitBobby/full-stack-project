@@ -9,3 +9,6 @@ aiosqlite
 
 langchain
 langchain-google-genai
+
+openai
+langchain_openai

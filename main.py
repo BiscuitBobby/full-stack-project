@@ -31,12 +31,16 @@ if os.getenv("GOOGLE_API_KEY"):
         temperature=0.1,
         api_key=os.getenv("GOOGLE_API_KEY")
     )
+    model_name = "gemini-2.0-flash"
 else:
     primary_llm = ChatOpenAI(
         base_url="http://localhost:1234/v1",
         api_key="lm-studio",
         # temperature=0.7,
     )
+    model_name = "lm-studio"
+
+print(model_name)
 
 # Create all database tables on startup
 async def create_tables():
@@ -107,12 +111,24 @@ async def analyze_pcb_image(
         )
         image_bytes = await image.read()
         image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-        message = HumanMessage(
-            content=[
-                {"type": "text", "text": await prompt.aformat()},
-                {"type": "image_url", "image_url": f"data:{image.content_type};base64,{image_base64}"},
-            ]
-        )
+
+        if model_name.startswith("gemini"):
+            # Google Gemini format
+            message = HumanMessage(
+                content=[
+                    {"type": "text", "text": await prompt.aformat()},
+                    {"type": "image_url", "image_url": f"data:{image.content_type};base64,{image_base64}"},
+                ]
+            )
+        else:
+            # LM Studio format - image_url must be an object with url property
+            message = HumanMessage(
+                content=[
+                    {"type": "text", "text": await prompt.aformat()},
+                    {"type": "image_url", "image_url": {"url": f"data:{image.content_type};base64,{image_base64}"}},
+                ]
+            )
+        
         output = await llm.ainvoke([message])
         analysis = parser.parse(output.content)
         return analysis
@@ -173,6 +189,18 @@ async def get_device_by_id(device_id: int, db: AsyncSession = Depends(get_db)):
     if device is None:
         raise HTTPException(status_code=404, detail="Device not found")
     return device
+
+
+@app.delete("/devices/{device_id}", status_code=204)
+async def delete_device(device_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Delete a specific device by its ID.
+    This will also delete all associated chat messages and the device image file.
+    """
+    success = await crud.delete_device(db, device_id=device_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Device not found")
+    # Return 204 No Content for successful deletion
 
 
 @app.get("/devices/{device_id}/chat-history", response_model=List[schemas.ChatMessage])

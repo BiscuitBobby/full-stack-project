@@ -17,6 +17,9 @@
             --text-muted-color: #9e9e9e;
             --primary-color: #4CAF50;
             --accent-color: #d4af37;
+            /* ADDED: Danger color for delete actions */
+            --danger-color: #d32f2f;
+            --danger-hover-color: #c62828;
             --modal-backdrop-color: rgba(0, 0, 0, 0.7);
             --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
@@ -90,9 +93,40 @@
             color: var(--text-color);
         }
 
+        /* ADDED: Danger button style */
+        button.danger {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: transparent;
+        }
+
+        button.danger:hover {
+            background-color: var(--danger-hover-color);
+        }
+
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+        
+        /* ADDED: Icon button style */
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted-color);
+            flex-shrink: 0;
+        }
+        .icon-btn:hover {
+            background-color: #3e3e3e;
+            color: var(--text-color);
+        }
+        .delete-btn:hover {
+            color: var(--danger-color);
         }
 
         .message {
@@ -163,10 +197,21 @@
             justify-content: space-between;
             align-items: center;
         }
-
+        
+        /* ADDED: Rule for header controls layout */
+        .device-card .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
         .device-card .card-header h3 {
             font-size: 18px;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .device-card .card-header span.date {
@@ -822,6 +867,20 @@
             </div>
         </div>
     </div>
+    
+    <!-- ADDED: Delete Confirmation Modal -->
+    <div id="delete-confirm-backdrop" class="modal-backdrop">
+        <div id="delete-confirm-modal" class="modal" style="max-width: 420px;">
+            <button id="delete-confirm-close-btn" class="modal-close-btn">×</button>
+            <h2>Confirm Deletion</h2>
+            <p id="delete-confirm-message" style="margin-bottom: 24px; line-height: 1.5; color: var(--text-muted-color);">Are you sure you want to permanently delete this device? This action cannot be undone.</p>
+            <div id="delete-error-container"></div>
+            <div class="modal-actions">
+                <button id="cancel-delete-btn" class="secondary">Cancel</button>
+                <button id="confirm-delete-btn" class="danger">Delete Device</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -866,6 +925,14 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
             const quickQuestionsList = document.getElementById('quick-questions');
+            
+            // --- ADDED: Delete Modal Element Selectors ---
+            const deleteConfirmBackdrop = document.getElementById('delete-confirm-backdrop');
+            const deleteConfirmCloseBtn = document.getElementById('delete-confirm-close-btn');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const deleteConfirmMessage = document.getElementById('delete-confirm-message');
+            const deleteErrorContainer = document.getElementById('delete-error-container');
 
 
             let uploadedFile = null;
@@ -912,6 +979,7 @@
                 }
             }
             
+            // MODIFIED: createDeviceCard includes a delete button
             function createDeviceCard(device) {
                 const card = document.createElement('div');
                 card.className = 'device-card';
@@ -924,6 +992,7 @@
                 const voltageIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
                 const componentsIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm16 14H5V5h14v14zM8 7h8v2H8zm0 4h8v2H8zm0 4h5v2H8z"/></svg>`;
                 const chatIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                const deleteIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7V4C9 3.46957 9.21071 2.96086 9.58579 2.58579C9.96086 2.21071 10.4696 2 11 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
                 
                 const displayedComponents = device.components.length > 3 
                     ? `${device.components.slice(0, 3).join(', ')}...` 
@@ -932,7 +1001,10 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <h3>${device.name}</h3>
-                        <span class="date">${createdAt}</span>
+                        <div class="header-controls">
+                            <span class="date">${createdAt}</span>
+                             <button class="delete-btn icon-btn" title="Delete Device" data-device-id="${device.id}" data-device-name="${device.name}">${deleteIcon}</button>
+                        </div>
                     </div>
                     <img src="${API_URL}/static/images/${device.image_filename}" alt="${device.name}" loading="lazy">
                     <span class="complexity-tag">${device.complexity}</span>
@@ -1037,10 +1109,10 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const devices = await response.json();
                     
+                    deviceGrid.innerHTML = '';
                     if (devices.length > 0) {
                         emptyState.classList.add('hidden');
                         deviceGrid.classList.remove('hidden');
-                        deviceGrid.innerHTML = '';
                         devices.forEach(createDeviceCard);
                     } else {
                         emptyState.classList.remove('hidden');
@@ -1144,14 +1216,13 @@
                     const avatar = `<div class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/><path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/></svg></div>`;
                     
                     const contentSpan = document.createElement('span');
-                    // Use marked to parse markdown, then DOMPurify to sanitize it
                     const sanitizedHtml = DOMPurify.sanitize(marked.parse(message));
                     contentSpan.innerHTML = sanitizedHtml;
 
-                    messageEl.innerHTML = avatar; // Add avatar first
-                    messageEl.appendChild(contentSpan); // Then add the content
+                    messageEl.innerHTML = avatar; 
+                    messageEl.appendChild(contentSpan);
 
-                } else { // 'user' message
+                } else { 
                     messageEl.classList.add('user-message');
                     messageEl.textContent = message;
                 }
@@ -1211,7 +1282,6 @@
             async function openChatModal(device) {
                 currentChatDeviceId = device.id;
 
-                // 1. Populate info pane
                 chatDeviceName.textContent = device.name;
                 chatDeviceNameInfo.textContent = device.name;
                 chatDeviceImage.src = `${API_URL}/static/images/${device.image_filename}`;
@@ -1226,7 +1296,6 @@
                     chatComponentsDisplay.appendChild(tag);
                 });
 
-                // 2. Populate quick questions
                 const questions = [
                     `How do I power the ${device.name}?`,
                     `What are the main functions of the ${device.components[0] || 'main component'}?`,
@@ -1244,7 +1313,6 @@
                     quickQuestionsList.appendChild(li);
                 });
 
-                // 3. Reset chat history and load from the server
                 chatMessages.innerHTML = '';
                 try {
                     const response = await fetch(`${API_URL}/devices/${device.id}/chat-history`);
@@ -1256,7 +1324,6 @@
                     if (history.length > 0) {
                         history.forEach(msg => addMessageToUI(msg.content, msg.role));
                     } else {
-                        // If there's no history, display the welcome message
                         const welcomeMessage = `Hello! I'm here to help you with questions about your **${device.name}**. I have analyzed this PCB and can provide information about its components, functionality, troubleshooting, and more. What would you like to know?`;
                         addMessageToUI(welcomeMessage, 'ai');
                     }
@@ -1266,8 +1333,6 @@
                     addMessageToUI(errorMessage, 'ai');
                 }
 
-
-                // 4. Show modal
                 chatModalBackdrop.classList.add('visible');
                 document.body.style.overflow = 'hidden';
             }
@@ -1278,15 +1343,67 @@
                 document.body.style.overflow = '';
                 currentChatDeviceId = null; 
             }
+
+            // --- ADDED: DELETE FUNCTIONALITY ---
+            function openDeleteConfirmModal(deviceId, deviceName) {
+                clearMessages(deleteErrorContainer);
+                deleteConfirmMessage.innerHTML = `Are you sure you want to permanently delete device <strong style="color: var(--text-color);">${deviceName}</strong>? This action cannot be undone.`;
+                confirmDeleteBtn.dataset.deviceId = deviceId;
+                deleteConfirmBackdrop.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDeleteConfirmModal() {
+                deleteConfirmBackdrop.classList.remove('visible');
+                document.body.style.overflow = '';
+                setTimeout(() => {
+                    confirmDeleteBtn.removeAttribute('data-device-id');
+                }, 300);
+            }
+
+            async function handleDeleteDevice() {
+                const deviceId = confirmDeleteBtn.dataset.deviceId;
+                if (!deviceId) return;
+
+                setButtonLoading(confirmDeleteBtn, true, 'Deleting...');
+
+                try {
+                    const response = await fetch(`${API_URL}/devices/${deviceId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ detail: 'Failed to delete device.' }));
+                        throw new Error(errorData.detail || `HTTP Error: ${response.status}`);
+                    }
+                    
+                    closeDeleteConfirmModal();
+                    await loadDevices(); 
+
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    showMessage(deleteErrorContainer, `Delete failed: ${error.message}`);
+                } finally {
+                    setButtonLoading(confirmDeleteBtn, false);
+                }
+            }
             
-            // Event listener to open chat modal
+            // MODIFIED: Event listener for device grid now handles chat and delete
             deviceGrid.addEventListener('click', (e) => {
                 const chatButton = e.target.closest('.chat-btn');
+                const deleteButton = e.target.closest('.delete-btn');
+
                 if (chatButton) {
                     const card = e.target.closest('.device-card');
                     if (card && card.dataset.deviceData) {
                         const device = JSON.parse(card.dataset.deviceData);
                         openChatModal(device);
+                    }
+                } else if (deleteButton) {
+                    const deviceId = deleteButton.dataset.deviceId;
+                    const deviceName = deleteButton.dataset.deviceName;
+                    if (deviceId && deviceName) {
+                        openDeleteConfirmModal(deviceId, deviceName);
                     }
                 }
             });
@@ -1295,6 +1412,14 @@
             chatModalCloseBtn.addEventListener('click', closeChatModal);
             chatModalBackdrop.addEventListener('click', (e) => {
                 if (e.target === chatModalBackdrop) closeChatModal();
+            });
+            
+            // ADDED: Event listeners for delete confirmation modal
+            deleteConfirmCloseBtn.addEventListener('click', closeDeleteConfirmModal);
+            cancelDeleteBtn.addEventListener('click', closeDeleteConfirmModal);
+            confirmDeleteBtn.addEventListener('click', handleDeleteDevice);
+            deleteConfirmBackdrop.addEventListener('click', (e) => {
+                if (e.target === deleteConfirmBackdrop) closeDeleteConfirmModal();
             });
 
             // Event listener for sending a message
