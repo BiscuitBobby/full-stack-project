@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import crud, models, schemas
 from database import engine, get_db
 
-# --- Gemini and LangChain Integration ---
+from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_core.output_parsers import JsonOutputParser
@@ -25,6 +25,19 @@ from langchain_core.prompts import PromptTemplate
 # Load environment variables from .env file
 load_dotenv()
 
+if os.getenv("GOOGLE_API_KEY"):
+    primary_llm = ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash",
+        temperature=0.1,
+        api_key=os.getenv("GOOGLE_API_KEY")
+    )
+else:
+    primary_llm = ChatOpenAI(
+        base_url="http://localhost:1234/v1",
+        api_key="lm-studio",
+        # temperature=0.7,
+    )
+
 # Create all database tables on startup
 async def create_tables():
     async with engine.begin() as conn:
@@ -32,16 +45,13 @@ async def create_tables():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    if not os.getenv("GOOGLE_API_KEY"):
-        raise RuntimeError("GOOGLE_API_KEY environment variable not set.")
     await create_tables()
     yield
     # Shutdown (if needed)
 
 app = FastAPI(
-    title="PCB Device Manager API with Gemini",
-    description="API for analyzing and managing PCB devices using Gemini.",
+    title="PCB Device Manager API",
+    description="API for analyzing and managing PCB devices.",
     lifespan=lifespan
 )
 
@@ -67,7 +77,7 @@ async def analyze_pcb_image(
     image: UploadFile = File(...)
 ):
     """
-    Analyzes a PCB image using the Gemini Vision model.
+    Analyzes a PCB image using the Vision model.
     It processes the `image`, sends it to the model, and returns a
     structured JSON analysis.
     """
@@ -75,7 +85,7 @@ async def analyze_pcb_image(
         raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
 
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
+        llm = primary_llm
         parser = JsonOutputParser(pydantic_object=schemas.AnalysisResult)
         prompt_template = """
         Analyze the provided image of a Printed Circuit Board (PCB). Based on your analysis, provide a detailed and structured JSON output.
@@ -246,7 +256,7 @@ async def chat_with_device(
     # --- Step 2: AI Processing (using the plain 'conversation_history_data') ---
     try:
         print("\n[DEBUG] CHAT - AI PROCESSING STAGE")
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.3)
+        llm = primary_llm
         
         components_str = ", ".join(device_components)
         device_context = f"""
@@ -284,10 +294,10 @@ async def chat_with_device(
             elif msg_data['role'] == "ai":
                 conversation_history.append(AIMessage(content=msg_data['content']))
         
-        print(f"\n[DEBUG] CHAT - Invoking Gemini API with {len(conversation_history)} total messages...")
+        print(f"\n[DEBUG] CHAT - Invoking LLM API with {len(conversation_history)} total messages...")
         response = await llm.ainvoke(conversation_history)
         ai_response_content = response.content
-        print("[DEBUG] CHAT - Received response from Gemini API.")
+        print("[DEBUG] CHAT - Received response from LLM API.")
 
     except Exception as e:
         print(f"[ERROR] CHAT - AI processing failed: {type(e).__name__} - {e}")
@@ -336,7 +346,7 @@ async def chat_with_device_and_image(
         raise HTTPException(status_code=404, detail="Device not found")
     
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.3)
+        llm = primary_llm
         components_str = ", ".join(device.components) if device.components else "No components listed"
         device_context = f"""
         Reference Device Information:
