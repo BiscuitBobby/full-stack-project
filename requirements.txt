@@ -12,3 +12,10 @@ langchain-google-genai
 
 openai
 langchain_openai
+
+ruff
+pytest
+pytest-asyncio
+httpx
+pytest-mock
+sqlalchemy[aiosqlite]

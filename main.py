@@ -13,7 +13,9 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 
-import crud, models, schemas
+import crud
+import models
+import schemas
 from database import engine, get_db
 
 from langchain_openai import ChatOpenAI
@@ -423,6 +425,9 @@ async def chat_with_device_and_image(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during chat: {str(e)}")
 
+@app.get("/")
+async def root():
+    return {"status": "online."}
 
 if __name__ == "__main__":
     import uvicorn
