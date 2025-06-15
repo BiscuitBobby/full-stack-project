@@ -16,7 +16,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'pytest'
+                sh 'pytest --junitxml=results.xml'
             }
         }
         stage('Build Docker Image') {
@@ -24,15 +24,14 @@ pipeline {
                 sh 'docker build -t project .'
             }
         }
-        stage('Run Container') {
-            steps {
-                sh 'docker run -d -p 8000:8000 --name project_container -e GOOGLE_API_KEY="$GOOGLE_API_KEY" project'
-            }
-        }
     }
     post {
+        success {
+            echo 'Deploying locally...'
+            sh "bash run.sh"
+        }
         always {
-            sh 'docker rm -f project_container || true'
+            junit 'results.xml'
         }
     }
 }
