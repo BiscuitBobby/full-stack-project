@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    environment {
+        GOOGLE_API_KEY = credentials('google-api-key-id')
+    }
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        stage('Lint') {
+            steps {
+                sh 'ruff check .'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'pytest'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t project .'
+            }
+        }
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 8000:8000 --name project_container -e GOOGLE_API_KEY="$GOOGLE_API_KEY" project'
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker rm -f project_container || true'
+        }
+    }
+}

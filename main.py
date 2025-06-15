@@ -27,11 +27,13 @@ from langchain_core.prompts import PromptTemplate
 # Load environment variables from .env file
 load_dotenv()
 
-if os.getenv("GOOGLE_API_KEY"):
+api_key = os.environ.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
+
+if api_key:
     primary_llm = ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
         temperature=0.1,
-        api_key=os.getenv("GOOGLE_API_KEY")
+        api_key=api_key
     )
     model_name = "gemini-2.0-flash"
 else:
