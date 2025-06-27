@@ -6,7 +6,8 @@ import logging
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError, APIException
 
@@ -51,9 +52,10 @@ class AIAnalysisException(APIException):
 # --- API Views ---
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def analyze_and_save_device(request):
     """
-    Analyzes a PCB image and saves the resulting device.
+    Analyzes a PCB image and saves the resulting device for the authenticated user.
     """
     image_file = request.FILES.get('image')
     if not image_file:
@@ -62,7 +64,7 @@ def analyze_and_save_device(request):
         raise ParseError("Invalid file type. Please upload an image.")
 
     try:
-        # ⚠️ Read image bytes and reset pointer
+        # Read image bytes and reset pointer
         image_bytes = image_file.read()
         image_base64 = base64.b64encode(image_bytes).decode("utf-8")
         image_file.seek(0)  # Reset for DRF serializer later
@@ -118,19 +120,19 @@ def analyze_and_save_device(request):
         except Exception:
             analysis = parsed_data
 
-        # 🔁 Add fallback/default name (could be user-generated later)
+        # Add fallback/default name (could be user-generated later)
         device_data = {
-            "name": "AI-Analyzed Device",  # ✅ FIX: Add default name
+            "name": request.data.get("name", "AI-Analyzed Device"),  # Allow custom name
             "components": analysis.get("components", []),
             "operating_voltage": analysis.get("operating_voltage"),
             "complexity": analysis.get("complexity"),
             "description": analysis.get("description"),
-            "image": image_file,  # ✅ FIX: image_file was reset above
+            "image": image_file,
         }
 
         serializer = DeviceResponseSerializer(data=device_data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -141,41 +143,46 @@ def analyze_and_save_device(request):
         raise AIAnalysisException(detail=f"Unexpected error: {str(e)}")
 
 
-
-
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def list_all_devices(request):
     """
-    Retrieve all saved devices.
+    Retrieve all devices for the authenticated user.
     """
-    devices = Device.objects.all().order_by('-created_at')
+    devices = Device.objects.filter(user=request.user).order_by('-created_at')
     serializer = DeviceResponseSerializer(devices, many=True)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_device_by_id(request, device_id):
     """
-    Retrieve a specific device by its ID, including its chat history.
+    Retrieve a specific device by its ID for the authenticated user, including its chat history.
     """
-    device = get_object_or_404(Device, pk=device_id)
+    device = get_object_or_404(Device, pk=device_id, user=request.user)
     serializer = DeviceWithMessagesSerializer(device)
     return Response(serializer.data)
 
+
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_device(request, device_id):
     """
-    Delete a specific device by its ID.
+    Delete a specific device by its ID for the authenticated user.
     """
-    device = get_object_or_404(Device, pk=device_id)
+    device = get_object_or_404(Device, pk=device_id, user=request.user)
     device.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def chat_with_device(request, device_id):
     """
-    Persistent chat endpoint. Django's ORM handles database sessions.
+    Persistent chat endpoint for user's device. Django's ORM handles database sessions.
     """
-    device = get_object_or_404(Device, pk=device_id)
+    device = get_object_or_404(Device, pk=device_id, user=request.user)
     user_message_content = request.data.get('message')
     if not user_message_content:
         raise ParseError("Message content not provided.")
@@ -190,6 +197,7 @@ def chat_with_device(request, device_id):
         device_context = f"""
         Device Information:
         - Name: {device.name}
+        - Owner: {device.user.username}
         - Complexity: {device.complexity}
         - Components: {components_str}
         - Operating Voltage: {device.operating_voltage}
@@ -224,17 +232,42 @@ def chat_with_device(request, device_id):
         "ai_response": ai_response_content,
     }, status=status.HTTP_200_OK)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_stats(request):
+    """
+    Get statistics for the authenticated user.
+    """
+    user_devices = Device.objects.filter(user=request.user)
+    total_devices = user_devices.count()
+    total_messages = sum(device.chat_messages.count() for device in user_devices)
+    
+    return Response({
+        "username": request.user.username,
+        "total_devices": total_devices,
+        "total_chat_messages": total_messages,
+        "devices_by_complexity": {
+            "Low": user_devices.filter(complexity="Low").count(),
+            "Medium": user_devices.filter(complexity="Medium").count(),
+            "High": user_devices.filter(complexity="High").count(),
+        }
+    })
+
+
 # Debug endpoint to test LLM connection
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def test_llm_connection(request):
     """
-    Test endpoint to verify LLM connectivity.
+    Test endpoint to verify LLM connectivity for authenticated users.
     """
     try:
         test_message = HumanMessage(content="Respond with a simple JSON object: {\"status\": \"working\", \"message\": \"LLM is functioning correctly\"}")
         response = primary_llm.invoke([test_message])
         
         return Response({
+            "user": request.user.username,
             "llm_model": model_name,
             "connection_status": "success",
             "response_type": type(response).__name__,
@@ -243,6 +276,7 @@ def test_llm_connection(request):
         })
     except Exception as e:
         return Response({
+            "user": request.user.username,
             "llm_model": model_name,
             "connection_status": "failed",
             "error": str(e),

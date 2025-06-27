@@ -23,8 +23,10 @@ class DeviceResponseSerializer(serializers.ModelSerializer):
         model = Device
         fields = [
             'id', 'name', 'image', 'created_at', 'complexity',
-            'components', 'operating_voltage', 'description'
+            'components', 'operating_voltage', 'description',
+            'user'
         ]
+        read_only_fields = ['user']
 
 # Corresponds to FastAPI's DeviceWithMessages
 class DeviceWithMessagesSerializer(serializers.ModelSerializer):

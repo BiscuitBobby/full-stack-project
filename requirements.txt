@@ -1,2 +1,13 @@
 django
+django-environ
 djangorestframework
+
+python-dotenv
+langchain
+langchain-openai
+langchain-google-genai
+Pillow
+
+
+uvicorn
+gunicorn
