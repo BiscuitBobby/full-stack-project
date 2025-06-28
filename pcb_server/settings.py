@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-tfbm=ou@^glk2-ugghm5vr=6hth=30s1bn9j_a4*45-t=k8))y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["django.biscuitbobby.eu.org"]
+ALLOWED_HOSTS = ["django.biscuitbobby.eu.org", "127.0.0.1", "localhost"]
 
 
 # Application definition
