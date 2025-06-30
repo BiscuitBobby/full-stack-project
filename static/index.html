@@ -38,30 +38,63 @@
             color: var(--text-color);
         }
         
-        /* --- ADDED: Styles for Login/Registration --- */
+        /* --- EDITED: Styles for Login/Registration to create a split-screen layout --- */
         #auth-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .auth-image-panel {
+            flex: 0 0 45%;
+            background: url('leftpanel.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .auth-image-panel .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .auth-image-panel .tagline {
+            font-style: italic;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .auth-content-panel {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .auth-form-wrapper {
-            background-color: var(--surface-color);
             padding: 40px;
-            border-radius: 16px;
+            background-color: #363636;
+        }
+
+        .auth-form-wrapper {
+            background-color: transparent;
+            padding: 0;
+            border: none;
             width: 100%;
-            max-width: 420px;
-            border: 1px solid var(--border-color);
+            max-width: 380px;
         }
         .auth-form-wrapper h1 {
-            text-align: center;
-            font-size: 24px;
+            text-align: left;
+            font-size: 28px;
             font-weight: 600;
             margin-bottom: 8px;
+            color: white;
         }
         .auth-form-wrapper .subtitle {
-            text-align: center;
+            text-align: left;
             color: var(--text-muted-color);
             margin-bottom: 32px;
         }
@@ -75,13 +108,14 @@
             font-weight: 500;
             margin-bottom: 8px;
             display: block;
+            color: var(--text-muted-color);
         }
         .auth-form-wrapper input {
             width: 100%;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
+            background-color: #1c1c1c;
+            border: 1px solid transparent;
             border-radius: 8px;
-            padding: 12px;
+            padding: 14px;
             color: var(--text-color);
             font-size: 14px;
             font-family: var(--font-family);
@@ -96,9 +130,12 @@
             color: white;
             font-weight: 600;
             margin-top: 12px;
+            padding-top: 14px;
+            padding-bottom: 14px;
+            border-radius: 8px;
         }
         .auth-switch-link {
-            text-align: center;
+            text-align: left;
             margin-top: 24px;
             font-size: 14px;
             color: var(--text-muted-color);
@@ -777,52 +814,79 @@
             font-weight: 600;
         }
 
+        @media (max-width: 900px) {
+            .auth-image-panel {
+                display: none;
+            }
+            .auth-content-panel {
+                flex-basis: 100%;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- ADDED: Authentication Container -->
+    <!-- EDITED: Authentication Container for split-screen layout -->
     <div id="auth-container">
-        <!-- Login View -->
-        <div id="login-view" class="auth-form-wrapper">
-            <h1>Welcome Back</h1>
-            <p class="subtitle">Please sign in to continue</p>
-            <div id="login-message-container"></div>
-            <form id="login-form">
-                <div>
-                    <label for="login-username">Username</label>
-                    <input type="text" id="login-username" name="username" required>
-                </div>
-                <div>
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" required>
-                </div>
-                <button type="submit" id="login-btn" class="auth-action-btn action">Login</button>
-            </form>
-            <p class="auth-switch-link">Don't have an account? <a id="show-register-link">Register</a></p>
+        <div class="auth-image-panel">
+            <div class="logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="6" cy="6" r="1.5" fill="white"></circle>
+                    <circle cx="12" cy="6" r="1.5" fill="white"></circle>
+                    <circle cx="18" cy="6" r="1.5" fill="white"></circle>
+                    <circle cx="6" cy="12" r="1.5" fill="white"></circle>
+                    <circle cx="12" cy="12" r="1.5" fill="white"></circle>
+                    <circle cx="18" cy="12" r="1.5" fill="white"></circle>
+                    <circle cx="6" cy="18" r="1.5" fill="white"></circle>
+                    <circle cx="12" cy="18" r="1.5" fill="white"></circle>
+                    <circle cx="18" cy="18" r="1.5" fill="white"></circle>
+                </svg>
+                <span>PCB_RECON</span>
+            </div>
+            <p class="tagline">"Simply upload and analyze PCB images"</p>
         </div>
+        <div class="auth-content-panel">
+            <!-- Login View -->
+            <div id="login-view" class="auth-form-wrapper">
+                <h1>Welcome Back</h1>
+                <p class="subtitle">Please sign in to continue</p>
+                <div id="login-message-container"></div>
+                <form id="login-form">
+                    <div>
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" name="username" required>
+                    </div>
+                    <div>
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" id="login-btn" class="auth-action-btn action">Login</button>
+                </form>
+                <p class="auth-switch-link">Don't have an account? <a id="show-register-link">Register</a></p>
+            </div>
 
-        <!-- Registration View -->
-        <div id="registration-view" class="auth-form-wrapper hidden">
-            <h1>Create Account</h1>
-            <p class="subtitle">Get started with your PCB manager</p>
-            <div id="register-message-container"></div>
-            <form id="registration-form">
-                <div>
-                    <label for="register-username">Username</label>
-                    <input type="text" id="register-username" name="username" required>
-                </div>
-                 <div>
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" name="email" required>
-                </div>
-                <div>
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" name="password" required>
-                </div>
-                <button type="submit" id="register-btn" class="auth-action-btn action">Create Account</button>
-            </form>
-            <p class="auth-switch-link">Already have an account? <a id="show-login-link">Login</a></p>
+            <!-- Registration View -->
+            <div id="registration-view" class="auth-form-wrapper hidden">
+                <h1>Create Account</h1>
+                <p class="subtitle">Get started with your PCB manager</p>
+                <div id="register-message-container"></div>
+                <form id="registration-form">
+                    <div>
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" name="username" required>
+                    </div>
+                    <div>
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div>
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" name="password" required>
+                    </div>
+                    <button type="submit" id="register-btn" class="auth-action-btn action">Create Account</button>
+                </form>
+                <p class="auth-switch-link">Already have an account? <a id="show-login-link">Login</a></p>
+            </div>
         </div>
     </div>
     
@@ -1022,7 +1086,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
                 // --- API Base URLS ---
-                const BASE_URL = 'https://django.biscuitbobby.eu.org'; // Base URL for the server
+                const BASE_URL = 'http://localhost:8000'; // Base URL for the server
                 const AUTH_BASE_URL = `${BASE_URL}/auth`; // Auth endpoints
                 const API_BASE_URL = `${BASE_URL}/api`; // API endpoints
 
