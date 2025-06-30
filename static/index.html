@@ -3,1683 +3,696 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCB Device Manager</title>
-    <!-- ADDED: Markdown and Sanitizer Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <!-- More descriptive page title -->
+    <title>PCB_RECON - Conversational AI for Embedded Systems</title>
     <style>
-        /* --- ALL CSS REMAINS THE SAME UNTIL THE END... --- */
-        :root {
-            --bg-color: #1c1c1c;
-            --surface-color: #2a2a2a;
-            --border-color: #444;
-            --text-color: #e0e0e0;
-            --text-muted-color: #9e9e9e;
-            --primary-color: #4CAF50;
-            --accent-color: #d4af37;
-            /* ADDED: Danger color for delete actions */
-            --danger-color: #d32f2f;
-            --danger-hover-color: #c62828;
-            --modal-backdrop-color: rgba(0, 0, 0, 0.7);
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-
+        
         body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-        
-        /* --- EDITED: Styles for Login/Registration to create a split-screen layout --- */
-        #auth-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .auth-image-panel {
-            flex: 0 0 45%;
-            background: url('leftpanel.jpg') no-repeat center center;
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 40px;
-            color: white;
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow-x: hidden;
             position: relative;
         }
-
-        .auth-image-panel .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .auth-image-panel .tagline {
-            font-style: italic;
-            color: var(--text-color);
-            font-size: 14px;
-        }
-
-        .auth-content-panel {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            background-color: #363636;
-        }
-
-        .auth-form-wrapper {
-            background-color: transparent;
-            padding: 0;
-            border: none;
-            width: 100%;
-            max-width: 380px;
-        }
-        .auth-form-wrapper h1 {
-            text-align: left;
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: white;
-        }
-        .auth-form-wrapper .subtitle {
-            text-align: left;
-            color: var(--text-muted-color);
-            margin-bottom: 32px;
-        }
-        .auth-form-wrapper form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .auth-form-wrapper label {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: block;
-            color: var(--text-muted-color);
-        }
-        .auth-form-wrapper input {
-            width: 100%;
-            background-color: #1c1c1c;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 14px;
-            color: var(--text-color);
-            font-size: 14px;
-            font-family: var(--font-family);
-        }
-        .auth-form-wrapper input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        .auth-form-wrapper .auth-action-btn {
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            margin-top: 12px;
-            padding-top: 14px;
-            padding-bottom: 14px;
-            border-radius: 8px;
-        }
-        .auth-switch-link {
-            text-align: left;
-            margin-top: 24px;
-            font-size: 14px;
-            color: var(--text-muted-color);
-        }
-        .auth-switch-link a {
-            color: var(--primary-color);
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .auth-switch-link a:hover {
-            text-decoration: underline;
-        }
         
-        #app-container {
-            padding: 40px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center; /* Changed for better alignment */
-            margin-bottom: 60px;
-        }
-
-        .header-text h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .header-text p {
-            color: var(--text-muted-color);
-        }
-
-        /* ADDED: Wrapper for header buttons */
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        button {
-            font-family: var(--font-family);
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 10px 16px;
-            transition: background-color 0.2s, color 0.2s, opacity 0.2s;
-            border: 1px solid transparent;
-        }
-
-        button.primary, .add-device-btn {
-            background-color: var(--surface-color);
-            color: var(--text-color);
-            border-color: var(--border-color);
-        }
-        
-        button.primary:hover, .add-device-btn:hover {
-            background-color: #3e3e3e;
-        }
-        
-        button.action {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        button.secondary {
-             background-color: transparent;
-             color: var(--text-muted-color);
-             border-color: var(--border-color);
-        }
-
-        button.secondary:hover {
-            background-color: var(--surface-color);
-            color: var(--text-color);
-        }
-
-        /* ADDED: Danger button style */
-        button.danger {
-            background-color: var(--danger-color);
-            color: white;
-            border-color: transparent;
-        }
-
-        button.danger:hover {
-            background-color: var(--danger-hover-color);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        /* ADDED: Icon button style */
-        .icon-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted-color);
-            flex-shrink: 0;
-        }
-        .icon-btn:hover {
-            background-color: #3e3e3e;
-            color: var(--text-color);
-        }
-        .delete-btn:hover {
-            color: var(--danger-color);
-        }
-
-        .message {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            word-break: break-word;
-        }
-
-        .message.error {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: #f44336;
-            border: 1px solid rgba(244, 67, 54, 0.3);
-        }
-
-        .message.success {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-
-        main {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        #empty-state {
-            text-align: center;
-            margin-top: 100px;
-            color: var(--text-muted-color);
-        }
-
-        #empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 24px;
-        }
-        
-        #empty-state h2 {
-            font-size: 20px;
-            color: var(--text-color);
-            margin-bottom: 8px;
-        }
-
-        #empty-state p {
-            margin-bottom: 24px;
-        }
-
-        #device-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-            width: 100%;
-        }
-
-        .device-card {
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .device-card .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        /* ADDED: Rule for header controls layout */
-        .device-card .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        
-        .device-card .card-header h3 {
-            font-size: 18px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .device-card .card-header span.date {
-            font-size: 12px;
-            color: var(--text-muted-color);
-        }
-
-        .device-card .complexity-tag {
-            background-color: var(--accent-color);
-            color: #111;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            align-self: flex-start;
-        }
-        
-        .device-card img {
-            width: 100%;
-            height: 200px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .device-card .card-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--text-muted-color);
-        }
-        
-        .device-card .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .device-card .info-item svg {
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
-            fill: currentColor;
-        }
-
-        .device-card .chat-btn {
-            width: 100%;
-            margin-top: auto;
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .device-card .chat-btn:hover {
-            background-color: #3e3e3e;
-        }
-
-        .modal-backdrop {
+        /* Animated Sphere Background */
+        .sphere-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background-color: var(--modal-backdrop-color);
+            height: 100vh;
+            z-index: -1;
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-            z-index: 1000;
         }
-
-        .modal-backdrop.visible {
-            opacity: 1;
-            visibility: visible;
+        
+        .animation-wrapper {
+            width: 80%;
+            max-width: 800px;
+            aspect-ratio: 1;
         }
-
-        .modal {
-            background-color: var(--surface-color);
-            padding: 24px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
+        
+        .sphere-animation {
             position: relative;
-            transform: scale(0.95);
-            transition: transform 0.3s;
-        }
-        
-        .modal-backdrop.visible .modal {
-            transform: scale(1);
-        }
-        
-        .modal-close-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: var(--text-muted-color);
-            font-size: 24px;
-            line-height: 1;
-            cursor: pointer;
-            padding: 4px;
-        }
-        
-        .modal-close-btn:hover {
-            color: var(--text-color);
-        }
-
-        .modal h2 {
-            font-size: 20px;
-            margin-bottom: 24px;
-            padding-right: 40px;
-        }
-
-        .modal label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .modal input[type="text"] {
             width: 100%;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text-color);
-            font-size: 14px;
-            margin-bottom: 20px;
-            font-family: var(--font-family);
+            height: 100%;
         }
         
-        .modal input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
+        .sphere path {
+            fill: url(#sphereGradient);
+            stroke-width: 1px;
+            stroke: rgba(80,80,80,.35);
+            backface-visibility: hidden;
         }
         
-        .modal input[readonly] {
-            background-color: var(--surface-color);
-            cursor: default;
-        }
-
-        #drop-zone {
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.2s;
-            position: relative;
-            margin-bottom: 20px;
+        @media (min-width: 500px) {
+            .sphere path {
+                stroke-width: .4px;
+            }
         }
         
-        #drop-zone.dragover {
-            border-color: var(--primary-color);
-        }
-
-        #drop-zone #upload-prompt p {
-            color: var(--text-muted-color);
-            margin: 4px 0;
-        }
-
-        #drop-zone #upload-prompt span {
-            font-size: 12px;
-            color: #666;
-        }
-
-        #image-preview-container {
-            position: relative;
-        }
-
-        #image-preview {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            background: rgba(26, 26, 26, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
         
-        #image-preview-container p {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.6);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        #modal-analysis-view .analysis-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background-color: rgba(76, 175, 80, 0.1);
-            color: #4CAF50;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .navbar.scrolled {
+            background: rgba(26, 26, 26, 0.9);
+            padding: 15px 0;
         }
         
-        .analysis-results-box {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .analysis-results-box .results-header {
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            padding: 0 30px;
         }
         
-        .analysis-results-box .complexity-tag {
-             background-color: var(--accent-color);
-             color: #111;
-             padding: 4px 8px;
-             border-radius: 12px;
-             font-size: 12px;
-             font-weight: 500;
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
         }
         
-        .analysis-results-box .result-item {
-            margin-bottom: 12px;
+        .logo:hover {
+            color: #47a3f3;
+            text-shadow: 0 0 20px rgba(71, 163, 243, 0.5);
         }
         
-        .analysis-results-box .result-item h4 {
-            font-size: 12px;
-            color: var(--text-muted-color);
-            margin-bottom: 8px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .analysis-results-box .components-list {
+        .nav-links {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .analysis-results-box .component-tag {
-            background-color: #3e3e3e;
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 13px;
-        }
-        
-        .analysis-results-box .result-value {
-            background-color: var(--bg-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        #chat-modal {
-            max-width: 900px;
-            width: 95%;
-            height: 80vh;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #chat-modal h2 {
-            padding: 24px 24px 0 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-        
-        #chat-modal .chat-container {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-            padding: 24px;
-            gap: 24px;
-        }
-
-        .chat-info-pane {
-            width: 320px;
-            flex-shrink: 0;
-            overflow-y: auto;
-            padding-right: 16px;
-        }
-        
-        .chat-info-pane img {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        .chat-info-pane h3 {
-            font-size: 18px;
-            margin-bottom: 16px;
-        }
-        
-        .chat-info-pane .analysis-results-box {
-            padding: 0;
-            border: none;
-        }
-
-        .chat-info-pane .result-item {
-             margin-bottom: 20px;
-        }
-        
-        .quick-questions-list {
             list-style: none;
+            gap: 40px;
         }
-        .quick-questions-list li {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--text-muted-color);
+        
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 10px 0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #47a3f3, #2dd4bf);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
             cursor: pointer;
-            transition: color 0.2s;
-        }
-        .quick-questions-list li:hover {
-            color: var(--text-color);
+            gap: 4px;
         }
         
-        .chat-conversation-pane {
-            flex-grow: 1;
+        .mobile-menu span {
+            width: 25px;
+            height: 3px;
+            background: #ffffff;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .mobile-menu.toggle span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        .mobile-menu.toggle span:nth-child(2) {
+            opacity: 0;
+        }
+        .mobile-menu.toggle span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        
+        /* Main Content */
+        .main-content {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        #chat-messages {
-            flex-grow: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            line-height: 1.5;
-            font-size: 14px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-        }
-        
-        .ai-message {
-            background-color: var(--bg-color);
-            align-self: flex-start;
-        }
-        
-        .ai-message .avatar {
-            background-color: #3e3e3e;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .user-message {
-            background-color: var(--primary-color);
-            color: white;
-            align-self: flex-end;
-        }
-        
-        .typing-indicator {
-            align-self: flex-start;
-            color: var(--text-muted-color);
-            font-style: italic;
-        }
-
-        #chat-form {
-            display: flex;
-            padding: 12px;
-            border-top: 1px solid var(--border-color);
-            gap: 12px;
-        }
-        
-        #chat-input {
-            flex-grow: 1;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text-color);
-            font-size: 14px;
-            font-family: var(--font-family);
-        }
-        #chat-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        #send-btn {
-            background-color: var(--primary-color);
-            border: none;
-            padding: 10px;
-            width: 44px;
-            height: 44px;
-            display: flex;
             align-items: center;
+            text-align: center;
+            padding: 100px 30px 0 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-section {
+            max-width: 800px;
+            margin-bottom: 60px;
+        }
+        
+        .hero-title {
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #47a3f3 50%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s both;
         }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--text-muted-color);
-            border-radius: 50%;
-            border-top-color: var(--text-color);
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* --- ADDED: CSS for Markdown Formatting --- */
-        .ai-message p { margin: 0.5em 0; }
-        .ai-message p:first-child { margin-top: 0; }
-        .ai-message p:last-child { margin-bottom: 0; }
-        .ai-message ul, .ai-message ol { padding-left: 20px; margin: 0.5em 0; }
-        .ai-message li { margin-bottom: 0.25em; }
-        .ai-message code {
-            background-color: #3e3e3e;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9em;
-        }
-        .ai-message pre {
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            margin: 1em 0;
-            overflow-x: auto;
-            font-size: 0.9em;
-        }
-        .ai-message pre code {
-            background-color: transparent;
-            padding: 0;
-            border-radius: 0;
-        }
-        .ai-message a { color: var(--accent-color); text-decoration: none; }
-        .ai-message a:hover { text-decoration: underline; }
-        .ai-message h1, .ai-message h2, .ai-message h3, .ai-message h4 {
-            margin-top: 1em;
-            margin-bottom: 0.5em;
+        
+        .cta-btn {
+            padding: 15px 35px;
+            font-size: 1.1rem;
             font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
         }
-
-        @media (max-width: 900px) {
-            .auth-image-panel {
-                display: none;
+        
+        .cta-btn.primary {
+            background: linear-gradient(135deg, #47a3f3, #2dd4bf);
+            color: #ffffff;
+        }
+        
+        .cta-btn.primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cta-btn.primary:hover::before {
+            left: 100%;
+        }
+        
+        .cta-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(71, 163, 243, 0.4);
+        }
+        
+        .cta-btn.secondary {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .cta-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #47a3f3;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(71, 163, 243, 0.2);
+        }
+        
+        /* Features Section - Fully Responsive */
+        .features {
+            margin-top: 100px;
+            margin-bottom: 60px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease-out 0.9s both;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            justify-items: center;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(71, 163, 243, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #47a3f3, #2dd4bf);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+        
+        .feature-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
             }
-            .auth-content-panel {
-                flex-basis: 100%;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: absolute;
+                top: 100%; /* Position below the navbar header */
+                left: 0;
+                right: 0;
+                background: rgba(26, 26, 26, 0.97); /* Solid background for menu */
+                backdrop-filter: blur(15px);
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                padding: 10px 0;
+                gap: 0; /* Override desktop gap */
+                
+                /* Hide menu by default */
+                opacity: 0;
+                transform: translateY(-10px);
+                pointer-events: none; /* Can't be clicked when hidden */
+                transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            }
+
+            /* NEW: Style for the active/visible mobile menu */
+            .nav-links.nav-active {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            /* NEW: Style for mobile menu list items */
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+
+            /* NEW: Make mobile menu links larger and easier to tap */
+            .nav-links a {
+                padding: 15px 0;
+                display: block;
+                width: 100%;
+            }
+
+            
+            .mobile-menu {
+                display: flex;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .nav-container {
+                padding: 0 20px;
+            }
+            
+            .main-content {
+                padding: 80px 20px 0 20px;
+            }
+            
+            .hero-section {
+                margin-bottom: 40px;
+            }
+            
+            .features {
+                margin-top: 60px;
+                padding: 0 15px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .feature-card {
+                padding: 25px 20px;
+                max-width: none;
+            }
+            
+            .feature-title {
+                font-size: 1.2rem;
+            }
+            
+            .feature-description {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .features {
+                padding: 0 10px;
+            }
+            
+            .feature-card {
+                padding: 20px 15px;
+            }
+            
+            .feature-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .feature-title {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            .feature-description {
+                font-size: 0.85rem;
+                line-height: 1.5;
+            }
+        }
+        
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 40px;
+            }
+            
+            .feature-card {
+                max-width: none;
+            }
+        }
+        
+        /* Medium screens - tablet landscape */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+            
+            .feature-card {
+                max-width: none;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- EDITED: Authentication Container for split-screen layout -->
-    <div id="auth-container">
-        <div class="auth-image-panel">
-            <div class="logo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="6" cy="6" r="1.5" fill="white"></circle>
-                    <circle cx="12" cy="6" r="1.5" fill="white"></circle>
-                    <circle cx="18" cy="6" r="1.5" fill="white"></circle>
-                    <circle cx="6" cy="12" r="1.5" fill="white"></circle>
-                    <circle cx="12" cy="12" r="1.5" fill="white"></circle>
-                    <circle cx="18" cy="12" r="1.5" fill="white"></circle>
-                    <circle cx="6" cy="18" r="1.5" fill="white"></circle>
-                    <circle cx="12" cy="18" r="1.5" fill="white"></circle>
-                    <circle cx="18" cy="18" r="1.5" fill="white"></circle>
+    <!-- Animated Sphere Background -->
+    <div class="sphere-background">
+        <div class="animation-wrapper">
+            <div class="sphere-animation">
+                <svg class="sphere" viewBox="0 0 440 440" stroke="rgba(80,80,80,.35)">
+                    <defs>
+                        <linearGradient id="sphereGradient" x1="5%" x2="5%" y1="0%" y2="15%">
+                            <stop stop-color="#373734" offset="0%"/>
+                            <stop stop-color="#242423" offset="50%"/>
+                            <stop stop-color="#0D0D0C" offset="100%"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M361.604 361.238c-24.407 24.408-51.119 37.27-59.662 28.727-8.542-8.543 4.319-35.255 28.726-59.663 24.408-24.407 51.12-37.269 59.663-28.726 8.542 8.543-4.319 35.255-28.727 59.662z"/>
+                    <path d="M360.72 360.354c-35.879 35.88-75.254 54.677-87.946 41.985-12.692-12.692 6.105-52.067 41.985-87.947 35.879-35.879 75.254-54.676 87.946-41.984 12.692 12.692-6.105 52.067-41.984 87.946z"/>
+                    <path d="M357.185 356.819c-44.91 44.91-94.376 68.258-110.485 52.149-16.11-16.11 7.238-65.575 52.149-110.485 44.91-44.91 94.376-68.259 110.485-52.15 16.11 16.11-7.239 65.576-52.149 110.486z"/>
+                    <path d="M350.998 350.632c-53.21 53.209-111.579 81.107-130.373 62.313-18.794-18.793 9.105-77.163 62.314-130.372 53.209-53.21 111.579-81.108 130.373-62.314 18.794 18.794-9.105 77.164-62.314 130.373z"/>
+                    <path d="M343.043 342.677c-59.8 59.799-125.292 91.26-146.283 70.268-20.99-20.99 10.47-86.483 70.269-146.282 59.799-59.8 125.292-91.26 146.283-70.269 20.99 20.99-10.47 86.484-70.27 146.283z"/>
+                    <path d="M334.646 334.28c-65.169 65.169-136.697 99.3-159.762 76.235-23.065-23.066 11.066-94.593 76.235-159.762s136.697-99.3 159.762-76.235c23.065 23.065-11.066 94.593-76.235 159.762z"/>
+                    <path d="M324.923 324.557c-69.806 69.806-146.38 106.411-171.031 81.76-24.652-24.652 11.953-101.226 81.759-171.032 69.806-69.806 146.38-106.411 171.031-81.76 24.652 24.653-11.953 101.226-81.759 171.032z"/>
+                    <path d="M312.99 312.625c-73.222 73.223-153.555 111.609-179.428 85.736-25.872-25.872 12.514-106.205 85.737-179.428s153.556-111.609 179.429-85.737c25.872 25.873-12.514 106.205-85.737 179.429z"/>
+                    <path d="M300.175 299.808c-75.909 75.909-159.11 115.778-185.837 89.052-26.726-26.727 13.143-109.929 89.051-185.837 75.908-75.908 159.11-115.778 185.837-89.051 26.726 26.726-13.143 109.928-89.051 185.836z"/>
+                    <path d="M284.707 284.34c-77.617 77.617-162.303 118.773-189.152 91.924-26.848-26.848 14.308-111.534 91.924-189.15C265.096 109.496 349.782 68.34 376.63 95.188c26.849 26.849-14.307 111.535-91.923 189.151z"/>
+                    <path d="M269.239 267.989c-78.105 78.104-163.187 119.656-190.035 92.807-26.849-26.848 14.703-111.93 92.807-190.035 78.105-78.104 163.187-119.656 190.035-92.807 26.849 26.848-14.703 111.93-92.807 190.035z"/>
+                    <path d="M252.887 252.52C175.27 330.138 90.584 371.294 63.736 344.446 36.887 317.596 78.043 232.91 155.66 155.293 233.276 77.677 317.962 36.521 344.81 63.37c26.85 26.848-14.307 111.534-91.923 189.15z"/>
+                    <path d="M236.977 236.61C161.069 312.52 77.867 352.389 51.14 325.663c-26.726-26.727 13.143-109.928 89.052-185.837 75.908-75.908 159.11-115.777 185.836-89.05 26.727 26.726-13.143 109.928-89.051 185.836z"/>
+                    <path d="M221.067 220.7C147.844 293.925 67.51 332.31 41.639 306.439c-25.873-25.873 12.513-106.206 85.736-179.429C200.6 53.786 280.931 15.4 306.804 41.272c25.872 25.873-12.514 106.206-85.737 179.429z"/>
+                    <path d="M205.157 204.79c-69.806 69.807-146.38 106.412-171.031 81.76-24.652-24.652 11.953-101.225 81.759-171.031 69.806-69.807 146.38-106.411 171.031-81.76 24.652 24.652-11.953 101.226-81.759 171.032z"/>
+                    <path d="M189.247 188.881c-65.169 65.169-136.696 99.3-159.762 76.235-23.065-23.065 11.066-94.593 76.235-159.762s136.697-99.3 159.762-76.235c23.065 23.065-11.066 94.593-76.235 159.762z"/>
+                    <path d="M173.337 172.971c-59.799 59.8-125.292 91.26-146.282 70.269-20.991-20.99 10.47-86.484 70.268-146.283 59.8-59.799 125.292-91.26 146.283-70.269 20.99 20.991-10.47 86.484-70.269 146.283z"/>
+                    <path d="M157.427 157.061c-53.209 53.21-111.578 81.108-130.372 62.314-18.794-18.794 9.104-77.164 62.313-130.373 53.21-53.209 111.58-81.108 130.373-62.314 18.794 18.794-9.105 77.164-62.314 130.373z"/>
+                    <path d="M141.517 141.151c-44.91 44.91-94.376 68.259-110.485 52.15-16.11-16.11 7.239-65.576 52.15-110.486 44.91-44.91 94.375-68.258 110.485-52.15 16.109 16.11-7.24 65.576-52.15 110.486z"/>
+                    <path d="M125.608 125.241c-35.88 35.88-75.255 54.677-87.947 41.985-12.692-12.692 6.105-52.067 41.985-87.947C115.525 43.4 154.9 24.603 167.592 37.295c12.692 12.692-6.105 52.067-41.984 87.946z"/>
+                    <path d="M109.698 109.332c-24.408 24.407-51.12 37.268-59.663 28.726-8.542-8.543 4.319-35.255 28.727-59.662 24.407-24.408 51.12-37.27 59.662-28.727 8.543 8.543-4.319 35.255-28.726 59.663z"/>
                 </svg>
-                <span>PCB_RECON</span>
-            </div>
-            <p class="tagline">"Simply upload and analyze PCB images"</p>
-        </div>
-        <div class="auth-content-panel">
-            <!-- Login View -->
-            <div id="login-view" class="auth-form-wrapper">
-                <h1>Welcome Back</h1>
-                <p class="subtitle">Please sign in to continue</p>
-                <div id="login-message-container"></div>
-                <form id="login-form">
-                    <div>
-                        <label for="login-username">Username</label>
-                        <input type="text" id="login-username" name="username" required>
-                    </div>
-                    <div>
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="password" required>
-                    </div>
-                    <button type="submit" id="login-btn" class="auth-action-btn action">Login</button>
-                </form>
-                <p class="auth-switch-link">Don't have an account? <a id="show-register-link">Register</a></p>
-            </div>
-
-            <!-- Registration View -->
-            <div id="registration-view" class="auth-form-wrapper hidden">
-                <h1>Create Account</h1>
-                <p class="subtitle">Get started with your PCB manager</p>
-                <div id="register-message-container"></div>
-                <form id="registration-form">
-                    <div>
-                        <label for="register-username">Username</label>
-                        <input type="text" id="register-username" name="username" required>
-                    </div>
-                    <div>
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" name="email" required>
-                    </div>
-                    <div>
-                        <label for="register-password">Password</label>
-                        <input type="password" id="register-password" name="password" required>
-                    </div>
-                    <button type="submit" id="register-btn" class="auth-action-btn action">Create Account</button>
-                </form>
-                <p class="auth-switch-link">Already have an account? <a id="show-login-link">Login</a></p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ADDED: Main Application Container (hidden by default) -->
-    <div id="app-container" class="hidden">
-        <!-- Header -->
-        <header>
-            <div class="header-text">
-                <h1>PCB Device Manager</h1>
-                <p>Upload and analyze PCB images, then chat about your devices</p>
-            </div>
-            <div class="header-actions">
-                <button class="add-device-btn primary">+ Add Device</button>
-                <button id="logout-btn" class="secondary">Logout</button>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main>
-            <!-- Empty State -->
-            <div id="empty-state">
-                <div class="icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 21.5C9 21.7761 8.77614 22 8.5 22H2.5C2.22386 22 2 21.7761 2 21.5V17.5C2 17.2239 2.22386 17 2.5 17H8.5C8.77614 17 9 17.2239 9 17.5V21.5Z" stroke="#9E9E9E" stroke-width="1.5"/>
-                        <path d="M7 17V8.5C7 8.22386 6.77614 8 6.5 8H3.5C3.22386 8 3 8.22386 3 8.5V10.5C3 10.7761 3.22386 11 3.5 11H6.5C6.77614 11 7 11.2239 7 11.5V13.5C7 13.7761 6.77614 14 6.5 14H3.5C3.22386 14 3 14.2239 3 14.5V17" stroke="#9E9E9E" stroke-width="1.5"/>
-                        <path d="M15 2.5C15 2.22386 15.2239 2 15.5 2H21.5C21.7761 2 22 2.22386 22 2.5V6.5C22 6.77614 21.7761 7 21.5 7H15.5C15.2239 7 15 6.77614 15 6.5V2.5Z" stroke="#9E9E9E" stroke-width="1.5"/>
-                        <path d="M17 7V15.5C17 15.7761 17.2239 16 17.5 16H20.5C20.7761 16 21 15.7761 21 15.5V13.5C21 13.2239 20.7761 13 20.5 13H17.5C17.2239 13 17 12.7761 17 12.5V10.5C17 10.2239 17.2239 10 17.5 10H20.5C20.7761 10 21 9.77614 21 9.5V7" stroke="#9E9E9E" stroke-width="1.5"/>
-                        <rect x="9" y="8" width="6" height="8" rx="1" stroke="#9E9E9E" stroke-width="1.5"/>
-                    </svg>
-                </div>
-                <h2>No devices added yet</h2>
-                <p>Upload your first PCB image to get started with AI analysis</p>
-                <button class="add-device-btn primary">+ Add Your First Device</button>
-            </div>
-
-            <!-- Device Grid (initially hidden) -->
-            <div id="device-grid" class="hidden">
-                <!-- Device cards will be added here by JS -->
-            </div>
-        </main>
-
-        <!-- Add/Analyze Modal (initially hidden) -->
-        <div id="modal-backdrop" class="modal-backdrop">
-            <div id="modal" class="modal">
-                <button id="modal-close-btn" class="modal-close-btn">×</button>
-                
-                <!-- Step 1 & 2 combined: Upload View -->
-                <div id="modal-upload-view">
-                    <h2>Add New PCB Device</h2>
-                    
-                    <div id="message-container"></div>
-                    
-                    <label for="device-name">Device Name</label>
-                    <input type="text" id="device-name" placeholder="Enter device name (e.g., Arduino Uno, Custom Board)">
-                    
-                    <label for="drop-zone">PCB Image</label>
-                    <div id="drop-zone">
-                        <div id="upload-prompt">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 12px;">
-                                <path d="M12 16.5V3M12 3L16.5 7.5M12 3L7.5 7.5" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M21 12v5.5c0 1.933-2.239 3.5-5 3.5s-5-1.567-5-3.5V12" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M3 12v5.5c0 1.933 2.239 3.5 5 3.5s5-1.567 5-3.5V12" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <h3>Upload PCB Image</h3>
-                            <p>Click to select or drag and drop</p>
-                            <span>PNG, JPG up to 10MB</span>
-                        </div>
-                        <div id="image-preview-container" class="hidden">
-                            <img id="image-preview" src="#" alt="PCB Preview">
-                            <p>Click to change image</p>
-                        </div>
-                    </div>
-                    <input type="file" id="file-input" class="hidden" accept="image/png,image/jpeg,image/jpg">
-
-                    <div id="modal-upload-actions" class="modal-actions hidden">
-                        <button id="analyze-btn" class="primary">Analyze PCB</button>
-                        <button id="remove-btn" class="secondary">Remove</button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Analysis View (initially hidden) -->
-                <div id="modal-analysis-view" class="hidden">
-                    <h2>Add New PCB Device</h2>
-                    
-                    <div id="analysis-message-container"></div>
-                    
-                    <label for="device-name-readonly">Device Name</label>
-                    <input type="text" id="device-name-readonly" readonly>
-
-                    <div class="analysis-status">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 7L9.00004 18L4 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <span>Analysis Complete</span>
-                    </div>
-                    
-                    <div class="analysis-results-box">
-                        <div class="results-header">
-                            <h3>PCB Analysis Results</h3>
-                            <span class="complexity-tag" id="complexity-display">Medium Complexity</span>
-                        </div>
-                        
-                        <div class="result-item">
-                            <h4>Detected Components</h4>
-                            <div class="components-list" id="components-display">
-                                <!-- Components will be populated here -->
-                            </div>
-                        </div>
-                        <div class="result-item">
-                            <h4>Operating Voltage</h4>
-                            <div class="result-value" id="voltage-display">3.3V - 5V</div>
-                        </div>
-                        <div class="result-item" style="margin-bottom:0;">
-                            <h4>Description</h4>
-                            <p id="description-display" style="font-size: 14px; color: var(--text-muted-color); line-height: 1.5;">This appears to be a microcontroller development board with various passive components and an LED indicator. The board shows good design practices with proper component placement.</p>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button id="save-btn" class="primary">Save Device</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Modal -->
-        <div id="chat-modal-backdrop" class="modal-backdrop">
-            <div id="chat-modal" class="modal">
-                <button id="chat-modal-close-btn" class="modal-close-btn">×</button>
-                <h2>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/>
-                        <path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/>
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/>
-                    </svg>                
-                    Chat about <span id="chat-device-name" style="color: var(--accent-color); margin-left: 4px;"></span>
-                </h2>
-                <div class="chat-container">
-                    <div class="chat-info-pane">
-                        <img id="chat-device-image" src="" alt="Device Image">
-                        <h3 id="chat-device-name-info"></h3>
-                        <div class="analysis-results-box">
-                            <div class="result-item">
-                                <h4>Components</h4>
-                                <div class="components-list" id="chat-components-display"></div>
-                            </div>
-                             <div class="result-item">
-                                <h4>Operating Voltage</h4>
-                                <div class="result-value" id="chat-voltage-display"></div>
-                            </div>
-                            <div class="result-item">
-                                <h4>Description</h4>
-                                <p id="chat-description-display" style="font-size: 14px; color: var(--text-muted-color); line-height: 1.5;"></p>
-                            </div>
-                             <div class="result-item">
-                                <h4>Quick Questions</h4>
-                                <ul id="quick-questions" class="quick-questions-list">
-                                    <!-- JS will populate this -->
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chat-conversation-pane">
-                        <div id="chat-messages">
-                            <!-- Messages will be added by JS -->
-                        </div>
-                        <form id="chat-form">
-                            <input type="text" id="chat-input" placeholder="Ask about this PCB device..." autocomplete="off">
-                            <button type="submit" id="send-btn" class="action">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ADDED: Delete Confirmation Modal -->
-        <div id="delete-confirm-backdrop" class="modal-backdrop">
-            <div id="delete-confirm-modal" class="modal" style="max-width: 420px;">
-                <button id="delete-confirm-close-btn" class="modal-close-btn">×</button>
-                <h2>Confirm Deletion</h2>
-                <p id="delete-confirm-message" style="margin-bottom: 24px; line-height: 1.5; color: var(--text-muted-color);">Are you sure you want to permanently delete this device? This action cannot be undone.</p>
-                <div id="delete-error-container"></div>
-                <div class="modal-actions">
-                    <button id="cancel-delete-btn" class="secondary">Cancel</button>
-                    <button id="confirm-delete-btn" class="danger">Delete Device</button>
-                </div>
             </div>
         </div>
     </div>
 
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:8000" class="logo">PCB_RECON</a>
+            <ul class="nav-links">
+                <li><a href="http://localhost:8000">Home</a></li>
+                <li><a href="http://localhost:8000/about">About</a></li>
+                <li><a href="http://localhost:8000/chat">Chat</a></li>
+            </ul>
+            <div class="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Main Content -->
+    <main class="main-content" id="home">
+        <section class="hero-section">
+            <h1 class="hero-title">Your Personal Conversational AI for Embedded Systems</h1>
+            <p class="hero-subtitle">
+                Ask technical questions, upload schematics, or share board layouts. Our LLM-powered agent interprets and responds with context-aware insights, designed for engineers building the future.
+            </p>
+            <div class="cta-buttons">
+                <a href="http://localhost:8000/chat" class="cta-btn primary">Try the AI Assistant</a>
+                <a href="#features" class="cta-btn secondary">Explore Features</a>
+            </div>
+        </section>
+
+        <!-- Enhanced Responsive Features Section -->
+        <section class="features" id="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3 class="feature-title">Ask Technical Questions</h3>
+                    <p class="feature-description">
+                        Get instant, accurate responses to your toughest hardware questions and software integration challenges, accelerating your design process.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="feature-title">Analyze Schematics & Layouts</h3>
+                    <p class="feature-description">
+                        Upload your PCB schematics and board layouts for automated review, optimization suggestions, and potential error checking.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="feature-title">Context-Aware Insights</h3>
+                    <p class="feature-description">
+                        Our agent is trained on vast engineering datasets, providing insights that understand the unique nuances of embedded systems design.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-                // --- API Base URLS ---
-                const BASE_URL = 'http://localhost:8000'; // Base URL for the server
-                const AUTH_BASE_URL = `${BASE_URL}/auth`; // Auth endpoints
-                const API_BASE_URL = `${BASE_URL}/api`; // API endpoints
+        // Sphere Animation Functions
+        function fitElementToParent(el, padding) {
+            var timeout = null;
+            function resize() {
+                if (timeout) clearTimeout(timeout);
+                anime.set(el, {scale: 1});
+                var pad = padding || 0;
+                var parentEl = el.parentNode;
+                var elOffsetWidth = el.offsetWidth - pad;
+                var parentOffsetWidth = parentEl.offsetWidth;
+                var ratio = parentOffsetWidth / elOffsetWidth;
+                timeout = setTimeout(function() {
+                    anime.set(el, {scale: ratio});
+                }, 10);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+        }
 
-                // --- Auth Element Selectors ---
-                const authContainer = document.getElementById('auth-container');
-                const appContainer = document.getElementById('app-container');
-                const loginView = document.getElementById('login-view');
-                const registrationView = document.getElementById('registration-view');
-                const loginForm = document.getElementById('login-form');
-                const registrationForm = document.getElementById('registration-form');
-                const showRegisterLink = document.getElementById('show-register-link');
-                const showLoginLink = document.getElementById('show-login-link');
-                const logoutBtn = document.getElementById('logout-btn');
-                const loginMessageContainer = document.getElementById('login-message-container');
-                const registerMessageContainer = document.getElementById('register-message-container');
+        // Initialize Sphere Animation
+        var sphereAnimation = (function() {
+            var sphereEl = document.querySelector('.sphere-animation');
+            var spherePathEls = sphereEl.querySelectorAll('.sphere path');
+            var pathLength = spherePathEls.length;
+            var animations = [];
+            
+            fitElementToParent(sphereEl);
+            
+            var breathAnimation = anime({
+                begin: function() {
+                    for (var i = 0; i < pathLength; i++) {
+                        animations.push(anime({
+                            targets: spherePathEls[i],
+                            stroke: {value: ['rgba(255,75,75,1)', 'rgba(47,140,163,1)'], duration: 500},
+                            translateX: [2, -4],
+                            translateY: [2, -4],
+                            easing: 'easeOutQuad',
+                            autoplay: false
+                        }));
+                    }
+                },
+                update: function(ins) {
+                    animations.forEach(function(animation, i) {
+                        var percent = (1 - Math.sin((i * .35) + (.0022 * ins.currentTime))) / 2;
+                        animation.seek(animation.duration * percent);
+                    });
+                },
+                duration: Infinity,
+                autoplay: false
+            });
+            
+            var introAnimation = anime.timeline({
+                autoplay: false
+            })
+            .add({
+                targets: spherePathEls,
+                strokeDashoffset: {
+                    value: [anime.setDashoffset, 0],
+                    duration: 3900,
+                    easing: 'easeInOutCirc',
+                    delay: anime.stagger(190, {direction: 'reverse'})
+                },
+                duration: 2000,
+                delay: anime.stagger(60, {direction: 'reverse'}),
+                easing: 'linear'
+            }, 0);
+            
+            var shadowAnimation = anime({
+                targets: '#sphereGradient',
+                x1: '25%',
+                x2: '25%',
+                y1: '0%',
+                y2: '75%',
+                duration: 30000,
+                easing: 'easeOutQuint',
+                autoplay: false
+            });
+            
+            function init() {
+                introAnimation.play();
+                breathAnimation.play();
+                shadowAnimation.play();
+            }
+            
+            init();
+        })();
 
-                // --- App Element Selectors ---
-                const addDeviceBtns = document.querySelectorAll('.add-device-btn');
-                const modalBackdrop = document.getElementById('modal-backdrop');
-                const modal = document.getElementById('modal');
-                const modalCloseBtn = document.getElementById('modal-close-btn');
-                const modalUploadView = document.getElementById('modal-upload-view');
-                const modalAnalysisView = document.getElementById('modal-analysis-view');
-                const deviceNameInput = document.getElementById('device-name');
-                const dropZone = document.getElementById('drop-zone');
-                const fileInput = document.getElementById('file-input');
-                const uploadPrompt = document.getElementById('upload-prompt');
-                const imagePreviewContainer = document.getElementById('image-preview-container');
-                const imagePreview = document.getElementById('image-preview');
-                const modalUploadActions = document.getElementById('modal-upload-actions');
-                const analyzeBtn = document.getElementById('analyze-btn');
-                const removeBtn = document.getElementById('remove-btn');
-                const deviceNameReadonly = document.getElementById('device-name-readonly');
-                const saveBtn = document.getElementById('save-btn');
-                const emptyState = document.getElementById('empty-state');
-                const deviceGrid = document.getElementById('device-grid');
-                const messageContainer = document.getElementById('message-container');
-                const analysisMessageContainer = document.getElementById('analysis-message-container');
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
-                // --- Chat Modal Element Selectors ---
-                const chatModalBackdrop = document.getElementById('chat-modal-backdrop');
-                const chatModalCloseBtn = document.getElementById('chat-modal-close-btn');
-                const chatDeviceName = document.getElementById('chat-device-name');
-                const chatDeviceNameInfo = document.getElementById('chat-device-name-info');
-                const chatDeviceImage = document.getElementById('chat-device-image');
-                const chatComponentsDisplay = document.getElementById('chat-components-display');
-                const chatVoltageDisplay = document.getElementById('chat-voltage-display');
-                const chatDescriptionDisplay = document.getElementById('chat-description-display');
-                const chatMessages = document.getElementById('chat-messages');
-                const chatForm = document.getElementById('chat-form');
-                const chatInput = document.getElementById('chat-input');
-                const quickQuestionsList = document.getElementById('quick-questions');
-                
-                // --- Delete Modal Element Selectors ---
-                const deleteConfirmBackdrop = document.getElementById('delete-confirm-backdrop');
-                const deleteConfirmCloseBtn = document.getElementById('delete-confirm-close-btn');
-                const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-                const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-                const deleteConfirmMessage = document.getElementById('delete-confirm-message');
-                const deleteErrorContainer = document.getElementById('delete-error-container');
-
-                // --- State Variables ---
-                let authToken = localStorage.getItem('authToken');
-                let uploadedFile = null;
-                let analysisResults = null;
-                let currentChatDeviceId = null; 
-
-                // --- Utility Functions ---
-                function showMessage(container, message, type = 'error') {
-                container.innerHTML = `<div class="message ${type}">${message}</div>`;
-                const timeout = (type === 'success') ? 5000 : 8000;
-                setTimeout(() => {
-                        if (container.firstChild) {
-                        container.removeChild(container.firstChild);
-                        }
-                }, timeout);
-                }
-
-                function clearMessages(container) {
-                container.innerHTML = '';
-                }
-                
-                function resetModal() {
-                modalUploadView.classList.remove('hidden');
-                modalAnalysisView.classList.add('hidden');
-                deviceNameInput.value = '';
-                fileInput.value = '';
-                uploadedFile = null;
-                analysisResults = null;
-                uploadPrompt.classList.remove('hidden');
-                imagePreviewContainer.classList.add('hidden');
-                modalUploadActions.classList.add('hidden');
-                imagePreview.src = '#';
-                clearMessages(messageContainer);
-                clearMessages(analysisMessageContainer);
-                }
-
-                function setButtonLoading(button, isLoading, loadingText = 'Loading...') {
-                if (isLoading) {
-                        button.disabled = true;
-                        button.dataset.originalText = button.innerHTML;
-                        button.innerHTML = `<span class="spinner"></span>${loadingText}`;
-                } else {
-                        button.disabled = false;
-                        button.innerHTML = button.dataset.originalText || '...';
-                }
-                }
-
-                // --- AUTHENTICATION & UI MANAGEMENT ---
-                
-                const initializeApp = () => {
-                if (authToken) {
-                        showAppUI();
-                } else {
-                        showAuthUI();
-                }
-                };
-                
-                const showAppUI = () => {
-                authContainer.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                loadDevices();
-                };
-                
-                const showAuthUI = () => {
-                appContainer.classList.add('hidden');
-                authContainer.classList.remove('hidden');
-                loginView.classList.remove('hidden');
-                registrationView.classList.add('hidden');
-                deviceGrid.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                deviceGrid.classList.add('hidden');
-                };
-
-                const handleLogin = async (e) => {
+        // Smooth scrolling for on-page anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                clearMessages(loginMessageContainer);
-                const loginBtn = document.getElementById('login-btn');
-                setButtonLoading(loginBtn, true, 'Logging in...');
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
                 
-                const formData = new FormData(loginForm);
-                try {
-                        const response = await fetch(`${AUTH_BASE_URL}/login/`, {
-                        method: 'POST',
-                        body: formData
-                        });
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                        // Concatenate error messages from the server response
-                        const errorMsg = Object.values(data).flat().join(' ');
-                        throw new Error(errorMsg || 'Login failed.');
-                        }
-                        
-                        const token = data.token || data.auth_token || data.key;
-                        if (!token) {
-                        throw new Error('Login successful but no token received.');
-                        }
-                        
-                        authToken = token;
-                        localStorage.setItem('authToken', authToken);
-                        showAppUI();
-
-                } catch (error) {
-                        showMessage(loginMessageContainer, error.message, 'error');
-                } finally {
-                        setButtonLoading(loginBtn, false);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
-                };
+            });
+        });
+    </script>
+    <script>
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
 
-                const handleRegister = async (e) => {
-                e.preventDefault();
-                clearMessages(registerMessageContainer);
-                const registerBtn = document.getElementById('register-btn');
-                setButtonLoading(registerBtn, true, 'Creating account...');
-                
-                const formData = new FormData(registrationForm);
-                try {
-                        const response = await fetch(`${AUTH_BASE_URL}/register/`, {
-                        method: 'POST',
-                        body: formData
-                        });
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                        const errorMsg = Object.entries(data).map(([key, value]) => `${key}: ${value.join(', ')}`).join(' ');
-                        throw new Error(errorMsg || 'Registration failed.');
-                        }
-
-                        // On successful registration, show login form with a success message
-                        registrationView.classList.add('hidden');
-                        loginView.classList.remove('hidden');
-                        showMessage(loginMessageContainer, 'Registration successful! Please log in.', 'success');
-                        loginForm.reset();
-                        registrationForm.reset();
-
-                } catch (error) {
-                        showMessage(registerMessageContainer, error.message, 'error');
-                } finally {
-                        setButtonLoading(registerBtn, false);
-                }
-                };
-
-                const handleLogout = async () => {
-                if (!authToken) {
-                        showAuthUI();
-                        return;
-                }
-                
-                try {
-                        await fetch(`${AUTH_BASE_URL}/logout/`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Token ${authToken}` }
-                        });
-                } catch (error) {
-                        console.error("Logout request failed, but clearing session anyway.", error);
-                } finally {
-                        authToken = null;
-                        localStorage.removeItem('authToken');
-                        showAuthUI();
-                }
-                };
-
-                // --- APP LOGIC (DEVICES, CHAT, ETC.) ---
-                
-                function createDeviceCard(device) {
-                const card = document.createElement('div');
-                card.className = 'device-card';
-                card.dataset.deviceData = JSON.stringify(device);
-
-                const createdAt = new Date(device.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric', month: 'short', day: 'numeric'
-                });
-
-                const voltageIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>`;
-                const componentsIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm16 14H5V5h14v14zM8 7h8v2H8zm0 4h8v2H8zm0 4h5v2H8z"/></svg>`;
-                const chatIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.4876 3.36093 14.891 4 16.1272L3 21L7.8728 20C9.10904 20.6391 10.5124 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-                const deleteIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 7L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7V4C9 3.46957 9.21071 2.96086 9.58579 2.58579C9.96086 2.21071 10.4696 2 11 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-                
-                const displayedComponents = device.components.length > 3 
-                        ? `${device.components.slice(0, 3).join(', ')}...` 
-                        : device.components.join(', ');
-
-                card.innerHTML = `
-                        <div class="card-header">
-                        <h3>${device.name}</h3>
-                        <div class="header-controls">
-                                <span class="date">${createdAt}</span>
-                                <button class="delete-btn icon-btn" title="Delete Device" data-device-id="${device.id}" data-device-name="${device.name}">${deleteIcon}</button>
-                        </div>
-                        </div>
-                        <img src="${BASE_URL}/${device.image}" alt="${device.name}" loading="lazy">
-                        <span class="complexity-tag">${device.complexity}</span>
-                        <div class="card-info">
-                        <div class="info-item">
-                                ${voltageIcon}
-                                <span>${device.operating_voltage}</span>
-                        </div>
-                        <div class="info-item">
-                                ${componentsIcon}
-                                <span>${displayedComponents}</span>
-                        </div>
-                        </div>
-                        <button class="chat-btn secondary">${chatIcon} Chat about this device</button>
-                `;
-                deviceGrid.appendChild(card);
-                }
-                
-                async function loadDevices() {
-                if (!authToken) return;
-                try {
-                        const response = await fetch(`${API_BASE_URL}/devices/`, {
-                        headers: { 'Authorization': `Token ${authToken}` }
-                        });
-                        if (response.status === 401) {
-                        handleLogout();
-                        return;
-                        }
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        const devices = await response.json();
-                        
-                        deviceGrid.innerHTML = '';
-                        if (devices.length > 0) {
-                        emptyState.classList.add('hidden');
-                        deviceGrid.classList.remove('hidden');
-                        devices.forEach(createDeviceCard);
-                        } else {
-                        emptyState.classList.remove('hidden');
-                        deviceGrid.classList.add('hidden');
-                        }
-                } catch (error) {
-                        console.error('Error loading devices:', error);
-                        if (error.message.includes('fetch')) {
-                        showMessage(document.querySelector('main'), 'Could not connect to the backend. Please ensure the server is running.', 'error');
-                        }
-                }
-                }
-                
-                analyzeBtn.addEventListener('click', async () => {
-                clearMessages(messageContainer);
-                if (!deviceNameInput.value.trim()) {
-                        showMessage(messageContainer, 'Please enter a device name.');
-                        deviceNameInput.focus();
-                        return;
-                }
-                if (!uploadedFile) {
-                        showMessage(messageContainer, 'Please upload a PCB image.');
-                        return;
-                }
-                
-                setButtonLoading(analyzeBtn, true, 'Analyzing...');
-                const formData = new FormData();
-                formData.append('image', uploadedFile);
-                // ========================= FIX #1: SEND THE DEVICE NAME =========================
-                // This line was missing. It adds the user-entered name to the request
-                // so the backend can save it correctly.
-                formData.append('name', deviceNameInput.value.trim());
-                // ==============================================================================
-
-                try {
-                        const response = await fetch(`${API_BASE_URL}/devices/analyze-pcb/`, {
-                        method: 'POST', 
-                        headers: { 'Authorization': `Token ${authToken}` },
-                        body: formData 
-                        });
-                        if (response.status === 401) { handleLogout(); return; }
-                        if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ detail: 'Analysis failed' }));
-                        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-                        }
-
-                        // The response is the newly created device object.
-                        analysisResults = await response.json();
-                        
-                        // Populate analysis view
-                        deviceNameReadonly.value = analysisResults.name; // Use the name from the response
-                        document.getElementById('complexity-display').textContent = `${analysisResults.complexity}`;
-                        document.getElementById('voltage-display').textContent = analysisResults.operating_voltage;
-                        document.getElementById('description-display').textContent = analysisResults.description;
-
-                        const componentsContainer = document.getElementById('components-display');
-                        componentsContainer.innerHTML = '';
-                        analysisResults.components.forEach(comp => {
-                        const tag = document.createElement('span');
-                        tag.className = 'component-tag';
-                        tag.textContent = comp;
-                        componentsContainer.appendChild(tag);
-                        });
-                        
-                        modalUploadView.classList.add('hidden');
-                        modalAnalysisView.classList.remove('hidden');
-                } catch (error) {
-                        console.error('Analysis error:', error);
-                        showMessage(messageContainer, `Analysis failed: ${error.message}`);
-                } finally {
-                        setButtonLoading(analyzeBtn, false);
-                }
-                });
-
-                // ========================= FIX #2: CORRECT THE "SAVE" BUTTON LOGIC =========================
-                saveBtn.addEventListener('click', async () => {
-                clearMessages(analysisMessageContainer);
-                if (!analysisResults) {
-                        showMessage(analysisMessageContainer, 'No analysis data to save.');
-                        return;
-                }
-                
-                // This button now acts as a "Done" button. The device is already saved.
-                // We just need to close the modal and refresh the device list.
-                setButtonLoading(saveBtn, true, 'Finishing...');
-
-                try {
-                        // The previous unnecessary `fetch` GET request has been removed.
-                        closeAddModal();
-                        await loadDevices(); // This refreshes the main page to show the new device.
-                } catch (error) {
-                        // This catch block will handle any errors from `loadDevices`.
-                        console.error('Error refreshing device list:', error);
-                        showMessage(analysisMessageContainer, `Failed to refresh device list: ${error.message}`);
-                } finally {
-                        setButtonLoading(saveBtn, false);
-                }
-                });
-                // =======================================================================================
-
-                async function submitMessage(message) {
-                if (!message.trim() || !currentChatDeviceId) return;
-
-                addMessageToUI(message, 'user');
-                chatInput.value = '';
-                showTypingIndicator();
-
-                try {
-                        const response = await fetch(`${API_BASE_URL}/devices/${currentChatDeviceId}/chat/`, {
-                        method: 'POST',
-                        headers: { 
-                                'Authorization': `Token ${authToken}`,
-                                'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ message: message })
-                        });
-
-                        removeTypingIndicator();
-                        if (response.status === 401) { handleLogout(); return; }
-
-                        if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ detail: 'An unknown error occurred.' }));
-                        throw new Error(errorData.detail || `HTTP error! Status: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-                        addMessageToUI(result.ai_response, 'ai');
-
-                } catch (error) {
-                        console.error('Chat submission error:', error);
-                        removeTypingIndicator();
-                        const errorMessage = `Sorry, I encountered an error and can't respond right now. Please try again later.`;
-                        addMessageToUI(errorMessage, 'ai');
-                }
-                }
-
-                async function handleDeleteDevice() {
-                const deviceId = confirmDeleteBtn.dataset.deviceId;
-                if (!deviceId) return;
-
-                setButtonLoading(confirmDeleteBtn, true, 'Deleting...');
-
-                try {
-                        const response = await fetch(`${API_BASE_URL}/devices/${deviceId}/delete/`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Token ${authToken}` }
-                        });
-                        if (response.status === 401) { handleLogout(); return; }
-                        if (!response.ok && response.status !== 204) {
-                        const errorData = await response.json().catch(() => ({ detail: 'Failed to delete device.' }));
-                        throw new Error(errorData.detail || `HTTP Error: ${response.status}`);
-                        }
-                        
-                        closeDeleteConfirmModal();
-                        await loadDevices(); 
-
-                } catch (error) {
-                        console.error('Delete error:', error);
-                        showMessage(deleteErrorContainer, `Delete failed: ${error.message}`);
-                } finally {
-                        setButtonLoading(confirmDeleteBtn, false);
-                }
-                }
-
-                // --- ALL OTHER FUNCTIONS (UI interactions, etc.) ---
-                function addMessageToUI(message, sender) {
-                const messageEl = document.createElement('div');
-                messageEl.classList.add('message-bubble');
-                if (sender === 'ai') {
-                        messageEl.classList.add('ai-message');
-                        const avatar = `<div class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 18H14V16.5H17.5V18Z" fill="currentColor"/><path d="M10 11.5H7.5V10H10V11.5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"/></svg></div>`;
-                        const contentSpan = document.createElement('span');
-                        const sanitizedHtml = DOMPurify.sanitize(marked.parse(message));
-                        contentSpan.innerHTML = sanitizedHtml;
-                        messageEl.innerHTML = avatar; 
-                        messageEl.appendChild(contentSpan);
-                } else { 
-                        messageEl.classList.add('user-message');
-                        messageEl.textContent = message;
-                }
-                chatMessages.appendChild(messageEl);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-                function showTypingIndicator() {
-                const indicator = document.createElement('div');
-                indicator.className = 'typing-indicator';
-                indicator.textContent = 'AI is thinking...';
-                chatMessages.appendChild(indicator);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-                function removeTypingIndicator() {
-                const indicator = chatMessages.querySelector('.typing-indicator');
-                if (indicator) chatMessages.removeChild(indicator);
-                }
-                async function openChatModal(device) {
-                currentChatDeviceId = device.id;
-                chatDeviceName.textContent = device.name;
-                chatDeviceNameInfo.textContent = device.name;
-                chatDeviceImage.src = `${BASE_URL}/${device.image}`;
-                chatVoltageDisplay.textContent = device.operating_voltage;
-                chatDescriptionDisplay.textContent = device.description;
-                chatComponentsDisplay.innerHTML = '';
-                device.components.forEach(comp => {
-                        const tag = document.createElement('span');
-                        tag.className = 'component-tag';
-                        tag.textContent = comp;
-                        chatComponentsDisplay.appendChild(tag);
-                });
-                const questions = [`How do I power the ${device.name}?`, `What are the main functions of the ${device.components[0] || 'main component'}?`, `Give me some common troubleshooting steps for this board.`];
-                quickQuestionsList.innerHTML = '';
-                questions.forEach(q => {
-                        const li = document.createElement('li');
-                        li.textContent = q;
-                        li.onclick = () => { chatInput.value = q; chatInput.focus(); submitMessage(q); };
-                        quickQuestionsList.appendChild(li);
-                });
-                chatMessages.innerHTML = '';
-                try {
-                        const response = await fetch(`${API_BASE_URL}/devices/${device.id}/`, {
-                        headers: { 'Authorization': `Token ${authToken}` }
-                        });
-                        if (response.status === 401) { handleLogout(); return; }
-                        if (!response.ok) throw new Error('Could not load chat history.');
-                        const deviceDetails = await response.json();
-                        const history = deviceDetails.chat_messages || [];
-                        if (history.length > 0) {
-                        history.forEach(msg => addMessageToUI(msg.content, msg.role));
-                        } else {
-                        const welcomeMessage = `Hello! I'm here to help you with questions about your **${device.name}**. What would you like to know?`;
-                        addMessageToUI(welcomeMessage, 'ai');
-                        }
-                } catch (error) {
-                        console.error("Failed to load chat history:", error);
-                        addMessageToUI("Could not load previous conversation.", 'ai');
-                }
-                chatModalBackdrop.classList.add('visible');
-                document.body.style.overflow = 'hidden';
-                }
-                function closeChatModal() {
-                chatModalBackdrop.classList.remove('visible');
-                document.body.style.overflow = '';
-                currentChatDeviceId = null; 
-                }
-                function openDeleteConfirmModal(deviceId, deviceName) {
-                clearMessages(deleteErrorContainer);
-                deleteConfirmMessage.innerHTML = `Are you sure you want to permanently delete device <strong style="color: var(--text-color);">${deviceName}</strong>? This action cannot be undone.`;
-                confirmDeleteBtn.dataset.deviceId = deviceId;
-                deleteConfirmBackdrop.classList.add('visible');
-                document.body.style.overflow = 'hidden';
-                }
-                function closeDeleteConfirmModal() {
-                deleteConfirmBackdrop.classList.remove('visible');
-                document.body.style.overflow = '';
-                setTimeout(() => { confirmDeleteBtn.removeAttribute('data-device-id'); }, 300);
-                }
-                const openAddModal = () => { modalBackdrop.classList.add('visible'); document.body.style.overflow = 'hidden'; };
-                const closeAddModal = () => { modalBackdrop.classList.remove('visible'); document.body.style.overflow = ''; setTimeout(resetModal, 300); };
-                function handleFile(file) {
-                clearMessages(messageContainer);
-                if (!file) return;
-                if (!file.type.startsWith('image/')) { showMessage(messageContainer, 'Please upload a valid image file (PNG, JPG).'); return; }
-                if (file.size > 10 * 1024 * 1024) { showMessage(messageContainer, 'File size must be less than 10MB.'); return; }
-                uploadedFile = file;
-                const reader = new FileReader();
-                reader.onload = (e) => { imagePreview.src = e.target.result; uploadPrompt.classList.add('hidden'); imagePreviewContainer.classList.remove('hidden'); modalUploadActions.classList.remove('hidden'); };
-                reader.onerror = () => showMessage(messageContainer, 'Error reading file. Please try again.');
-                reader.readAsDataURL(file);
-                }
-
-                // --- EVENT LISTENERS ---
-                loginForm.addEventListener('submit', handleLogin);
-                registrationForm.addEventListener('submit', handleRegister);
-                logoutBtn.addEventListener('click', handleLogout);
-                showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); loginView.classList.add('hidden'); registrationView.classList.remove('hidden'); });
-                showLoginLink.addEventListener('click', (e) => { e.preventDefault(); registrationView.classList.add('hidden'); loginView.classList.remove('hidden'); });
-
-                addDeviceBtns.forEach(btn => btn.addEventListener('click', openAddModal));
-                modalCloseBtn.addEventListener('click', closeAddModal);
-                modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeAddModal(); });
-                dropZone.addEventListener('click', () => fileInput.click());
-                fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-                dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-                dropZone.addEventListener('dragleave', (e) => { if (!dropZone.contains(e.relatedTarget)) { dropZone.classList.remove('dragover'); } });
-                dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
-                removeBtn.addEventListener('click', () => { resetModal(); });
-                
-                chatModalCloseBtn.addEventListener('click', closeChatModal);
-                chatModalBackdrop.addEventListener('click', (e) => { if (e.target === chatModalBackdrop) closeChatModal(); });
-                chatForm.addEventListener('submit', (e) => { e.preventDefault(); submitMessage(chatInput.value); });
-                deleteConfirmCloseBtn.addEventListener('click', closeDeleteConfirmModal);
-                cancelDeleteBtn.addEventListener('click', closeDeleteConfirmModal);
-                confirmDeleteBtn.addEventListener('click', handleDeleteDevice);
-                deleteConfirmBackdrop.addEventListener('click', (e) => { if (e.target === deleteConfirmBackdrop) closeDeleteConfirmModal(); });
-
-                deviceGrid.addEventListener('click', (e) => {
-                const chatButton = e.target.closest('.chat-btn');
-                const deleteButton = e.target.closest('.delete-btn');
-                if (chatButton) {
-                        const card = e.target.closest('.device-card');
-                        if (card && card.dataset.deviceData) openChatModal(JSON.parse(card.dataset.deviceData));
-                } else if (deleteButton) {
-                        const { deviceId, deviceName } = deleteButton.dataset;
-                        if (deviceId && deviceName) openDeleteConfirmModal(deviceId, deviceName);
-                }
-                });
-
-                // --- Initial Load ---
-                initializeApp();
+        mobileMenu.addEventListener('click', () => {
+            // Toggle the .nav-active class to show/hide the mobile menu
+            navLinks.classList.toggle('nav-active');
+            
+            // Toggle the .toggle class for the hamburger icon animation
+            mobileMenu.classList.toggle('toggle');
         });
     </script>
 </body>

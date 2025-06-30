@@ -18,8 +18,21 @@ from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
 from django.conf.urls.static import static
+from django.shortcuts import render
+
+def index(request):
+    return render(request, 'index.html')
+
+def chat(request):
+    return render(request, 'chat.html')
+
+def about(request):
+    return render(request, 'about.html')
 
 urlpatterns = [
+    path('', index, name='index'),
+    path('chat', chat, name='chat'),
+    path('about', about, name='about'),
     path('admin/', admin.site.urls),
     path('auth/', include('accounts.urls')),
     path('api/', include('pcb_manager.urls')),

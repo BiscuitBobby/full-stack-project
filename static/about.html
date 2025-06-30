@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - PCB_RECON</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            /* Added background from home page for consistency */
+            background: #1a1a1a;
+        }
+
+        /* --- NAVBAR CSS ADDED FROM HOME PAGE --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            background: rgba(26, 26, 26, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background: rgba(26, 26, 26, 0.9);
+            padding: 15px 0;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: #47a3f3;
+            text-shadow: 0 0 20px rgba(71, 163, 243, 0.5);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+        }
+        
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 10px 0;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #47a3f3, #2dd4bf);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Mobile Menu Icon */
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+        
+        .mobile-menu span {
+            width: 25px;
+            height: 3px;
+            background: #ffffff;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .mobile-menu.toggle span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        .mobile-menu.toggle span:nth-child(2) {
+            opacity: 0;
+        }
+        .mobile-menu.toggle span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        /* --- END OF NAVBAR CSS --- */
+
+
+        .team-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0f0f0f 100%);
+            /* Padding adjusted to account for fixed navbar */
+            padding: 100px 1rem 5rem 1rem;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="20" cy="80" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            /* Changed color to match new theme */
+            background: linear-gradient(90deg, #47a3f3, #2dd4bf);
+            border-radius: 2px;
+        }
+
+        .section-description {
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .team-grid {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .team-card {
+            background: rgba(35, 35, 35, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            width: 400px;
+            height: 550px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #47a3f3, #2dd4bf);
+        }
+
+        .team-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(71, 163, 243, 0.3);
+        }
+
+        .member-image {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 2rem;
+            display: block;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+        }
+
+        .team-card:hover .member-image {
+            transform: scale(1.1);
+        }
+
+        .member-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+        }
+
+        .member-name a {
+          color: #ffffff;
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+
+        .member-name a:hover {
+          text-decoration: none; 
+          color: #47a3f3;
+        }
+
+
+        .member-role {
+            font-size: 1rem;
+            color: #2dd4bf;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 1.2rem;
+        }
+
+        .member-description {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 120px;
+        }
+        
+        /* Responsive Media Queries */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: absolute;
+                top: 100%; /* Position below the navbar header */
+                left: 0;
+                right: 0;
+                background: rgba(26, 26, 26, 0.97); /* Solid background for menu */
+                backdrop-filter: blur(15px);
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                padding: 10px 0;
+                gap: 0; /* Override desktop gap */
+                
+                /* Hide menu by default */
+                opacity: 0;
+                transform: translateY(-10px);
+                pointer-events: none; /* Can't be clicked when hidden */
+                transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            }
+
+            /* NEW: Style for the active/visible mobile menu */
+            .nav-links.nav-active {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            /* NEW: Style for mobile menu list items */
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+
+            /* NEW: Make mobile menu links larger and easier to tap */
+            .nav-links a {
+                padding: 15px 0;
+                display: block;
+                width: 100%;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+
+            .team-section {
+                padding: 100px 1rem 3rem 1rem;
+            }
+
+            .section-title {
+                font-size: 2.2rem;
+            }
+
+            .team-grid {
+                flex-direction: column;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .team-card {
+                padding: 2rem 1.5rem;
+                width: 100%;
+                max-width: 400px;
+                height: 500px;
+            }
+
+            .member-image {
+                width: 140px;
+                height: 140px;
+            }
+
+            .member-name {
+                font-size: 1.3rem;
+            }
+
+            .member-description {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1023px) {
+            .team-grid {
+                justify-content: center;
+            }
+            
+            .team-card {
+                width: 380px;
+            }
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .team-card:nth-child(odd) {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .team-card:nth-child(even) {
+            animation: float 6s ease-in-out infinite 3s;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- ADDED: Navbar from home page -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="http://localhost:8000" class="logo">PCB_RECON</a>
+            <ul class="nav-links">
+                <li><a href="http://localhost:8000">Home</a></li>
+                <li><a href="http://localhost:8000/about">About</a></li>
+                <li><a href="http://localhost:8000/chat">Chat</a></li>
+            </ul>
+            <div class="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="team-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Meet The Team</h2>
+                <p class="section-description">
+                    We're a passionate team of developers and designers working together to create amazing digital experiences.
+                </p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card">
+                    <div>
+                        <img src="https://avatars.githubusercontent.com/u/87699062?v=4" alt="Siddharth Menon" class="member-image">
+                        <h3 class="member-name">
+                          <a href="https://github.com/BiscuitBobby" target="_blank" rel="noopener noreferrer">Siddharth Menon</a>
+                        </h3>
+                        <p class="member-role">kernel Developer</p>
+                    </div>
+                    <p class="member-description">
+                        Backend developer with experience in system-level programming and kernel development, with a strong interest in designing performant and dependable systems.
+                    </p>
+                </div>
+
+                <div class="team-card">
+                    <div>
+                        <img src="https://avatars.githubusercontent.com/u/119277894?v=4" alt="Aparna Balaji" class="member-image">
+                        <h3 class="member-name">
+                          <a href="https://github.com/aprnbji" target="_blank" rel="noopener noreferrer">Aparna Balaji</a>
+                        </h3>
+                        <p class="member-role">Security Engineer</p>
+                    </div>
+                    <p class="member-description">
+                        Experienced in secure system design and predictive modeling, with a strong interest in building intelligent, resilient infrastructure.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navbar scroll effect script -->
+    <script>
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+    <script>
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            // Toggle the .nav-active class to show/hide the mobile menu
+            navLinks.classList.toggle('nav-active');
+            
+            // Toggle the .toggle class for the hamburger icon animation
+            mobileMenu.classList.toggle('toggle');
+        });
+    </script>
+</body>
+</html>
