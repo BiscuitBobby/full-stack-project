@@ -23,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tfbm=ou@^glk2-ugghm5vr=6hth=30s1bn9j_a4*45-t=k8))y'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["django.biscuitbobby.eu.org", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["pcb.biscuitbobby.eu.org", "127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -86,10 +86,20 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+PSQL_NAME = env('PSQL_NAME')
+PSQL_USER = env('PSQL_USER')
+PSQL_PASSWORD = env('PSQL_PASSWORD')
+PSQL_HOST = env('PSQL_HOST')
+PSQL_PORT = env('PSQL_PORT')
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': PSQL_NAME,
+        'USER': PSQL_USER,
+        'PASSWORD': PSQL_PASSWORD,
+        'HOST': PSQL_HOST,
+        'PORT': PSQL_PORT,
     }
 }
 
@@ -137,8 +147,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = '/'
-MEDIA_ROOT = BASE_DIR
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

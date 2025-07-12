@@ -192,6 +192,7 @@ def chat_with_device(request, device_id):
     # --- Step 2: AI Processing ---
     try:
         components_str = ", ".join(device.components)
+        image_url = request.build_absolute_uri(device.image.url.lstrip('/'))
         device_context = f"""
         Device Information:
         - Name: {device.name}
@@ -200,7 +201,7 @@ def chat_with_device(request, device_id):
         - Components: {components_str}
         - Operating Voltage: {device.operating_voltage}
         - Description: {device.description}
-        - Image: Available at {request.build_absolute_uri(device.image.url)}
+        - Image: Available at {image_url}
         """
         system_message = SystemMessage(content=f"You are an expert electronics engineer specializing in PCB analysis and troubleshooting. {device_context}")
 
@@ -229,7 +230,6 @@ def chat_with_device(request, device_id):
         "device_id": device.id,
         "ai_response": ai_response_content,
     }, status=status.HTTP_200_OK)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

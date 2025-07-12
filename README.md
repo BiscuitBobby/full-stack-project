@@ -14,6 +14,11 @@
 
    ```env
    GOOGLE_API_KEY=your_google_api_key_here
+   PSQL_NAME=example_name
+   PSQL_USER=example_user
+   PSQL_PASSWORD=example_password
+   PSQL_HOST=localhost
+   PSQL_PORT=6024
    ```
 
    Your project directory will roughly look like this:
@@ -29,8 +34,9 @@
 
 3. ### Start the Development Server
 
-   Launch the application with `uvicorn`:
+   Migrate and launch the application with `uvicorn`:
 
    ```bash
+   python manage.py migrate
    uvicorn pcb_server.asgi:application --reload
    ```

@@ -8,7 +8,7 @@ langchain
 langchain-openai
 langchain-google-genai
 Pillow
-
+psycopg2-binary
 
 uvicorn
 gunicorn
